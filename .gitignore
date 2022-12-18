@@ -3,10 +3,12 @@
 
 # Production
 /build
+/coverage
 
 # Generated files
 .docusaurus
 .cache-loader
+.eslintcache
 
 # Misc
 .DS_Store
