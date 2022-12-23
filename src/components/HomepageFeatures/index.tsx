@@ -10,36 +10,34 @@ interface FeatureItem {
   title: string;
   Svg: React.ComponentType<React.ComponentProps<"svg">>;
   description: JSX.Element;
+  link?: string;
 }
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "Easy to Use",
+    title: "閱讀分享",
     Svg: Svg1,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        我訂閱了許多電子報，每天都會收到許多有趣的文章。我會將我喜歡的技術文章分享在這裡，並且會將文章的內容簡單的整理成筆記，和大家分享。
       </>
     ),
   },
   {
-    title: "Focus on What Matters",
+    title: "學習筆記",
     Svg: Svg2,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        我喜歡學習新的技術，而且喜歡將學習的內容整理成筆記。我會將我喜歡的課程分享在這裡，並且會將課程的內容簡單的整理成筆記，與大家分享。
       </>
     ),
   },
   {
-    title: "Powered by React",
+    title: "部落格",
     Svg: Svg3,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        如果我有空的話，我會在這裡嘗試編寫一些原創文章，或者是將大範圍的技術或是概念整理起來，向大家分享。
       </>
     ),
   },

@@ -59,8 +59,9 @@ const config = {
       navbar: {
         title: "Jay's Domain",
         logo: {
-          alt: "My Site Logo",
-          src: "img/logo.svg",
+          alt: "Site Logo",
+          src: "img/icon/icon.svg",
+          srcDark: "img/icon/icon-dark.svg",
         },
         items: [
           {

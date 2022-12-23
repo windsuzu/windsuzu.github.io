@@ -35,9 +35,10 @@
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.31.11",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.1.0",
     "prettier": "2.8.1",
-    "typescript": "*",
-    "husky": "^8.0.0"
+    "typescript": "*"
   },
   "browserslist": {
     "production": [
