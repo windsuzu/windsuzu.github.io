@@ -33,18 +33,14 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+          showLastUpdateTime: true,
+          editUrl: "https://github.com/windsuzu/windsuzu.github.io/tree/master",
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+          editUrl: "https://github.com/windsuzu/windsuzu.github.io/tree/master",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
@@ -56,7 +52,20 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      image: "img/icon/social.png",
+      metadata: [
+        {
+          name: "description",
+          content: "Discover, share, and grow",
+        },
+      ],
+      docs: {
+        sidebar: {
+          autoCollapseCategories: true,
+        },
+      },
       navbar: {
+        hideOnScroll: true,
         title: "Jay's Domain",
         logo: {
           alt: "Site Logo",
@@ -65,58 +74,62 @@ const config = {
         },
         items: [
           {
-            type: "doc",
-            docId: "intro",
+            type: "dropdown",
             position: "left",
-            label: "Tutorial",
+            label: "閱讀分享",
+            items: [
+              {
+                type: "doc",
+                label: "前端工程",
+                docId: "reading/frontend/intro",
+                sidebarId: "frontend",
+              },
+            ],
           },
-          { to: "/blog", label: "Blog", position: "left" },
           {
-            href: "https://github.com/facebook/docusaurus",
-            label: "GitHub",
+            type: "doc",
+            docId: "learning/intro",
+            position: "left",
+            label: "學習筆記",
+          },
+          { to: "/blog", label: "部落格", position: "left" },
+          {
+            href: "https://www.github.com/windsuzu/windsuzu.github.io",
+            label: "Source",
             position: "right",
           },
         ],
       },
       footer: {
-        style: "dark",
         links: [
           {
-            title: "Docs",
+            title: "閱讀分享",
             items: [
               {
-                label: "Tutorial",
-                to: "/docs/intro",
+                label: "前端工程",
+                to: "reading/frontend/intro",
               },
             ],
           },
           {
-            title: "Community",
+            title: "筆記和部落格",
             items: [
               {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
+                label: "學習筆記",
+                to: "learning/intro",
               },
               {
-                label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
-              },
-              {
-                label: "Twitter",
-                href: "https://twitter.com/docusaurus",
-              },
-            ],
-          },
-          {
-            title: "More",
-            items: [
-              {
-                label: "Blog",
+                label: "部落格",
                 to: "/blog",
               },
+            ],
+          },
+          {
+            title: "更多",
+            items: [
               {
-                label: "GitHub",
-                href: "https://github.com/facebook/docusaurus",
+                label: "My GitHub",
+                href: "https://www.github.com/windsuzu",
               },
             ],
           },

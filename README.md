@@ -24,18 +24,8 @@ $ yarn build
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
 
-### Deployment
+### Deploy
 
-Using SSH:
+I use Github Actions to deploy the website to Github Pages. The workflow is defined in `.github/workflows/deploy.yml`. The workflow is triggered on every push to the `master` branch. The workflow builds the website and pushes the build files to the `gh-pages` branch.
 
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+For more information, please refer to the [Docusaurus documentation - Triggering deployment with GitHub Actions](https://docusaurus.io/docs/deployment#triggering-deployment-with-github-actions).

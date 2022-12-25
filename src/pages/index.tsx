@@ -39,10 +39,7 @@ function HomepageHeader(): JSX.Element {
 
 export default function Home(): JSX.Element {
   return (
-    <Layout
-      title="Hello"
-      description="Description will go into a meta tag in <head />"
-    >
+    <Layout title="Hello">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
