@@ -15,11 +15,11 @@ interface FeatureItem {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: "閱讀分享",
+    title: "閱讀前端",
     Svg: Svg1,
     description: (
       <>
-        我訂閱了許多電子報，常常收到許多有趣的文章，我會將喜歡的技術文章整理成筆記分享給你。
+        前端技術日新月異，有許多電子報常分享有趣的文章，我會將喜歡的技術文章整理成筆記分享給你。
       </>
     ),
   },

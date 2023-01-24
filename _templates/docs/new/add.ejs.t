@@ -1,9 +1,9 @@
 ---
-to: docs/<%= name %>.mdx
+to: docs/<%= h.inflection.dasherize(h.changeCase.lower(title)) %>.mdx
 ---
 
 ---
-id: <%= name %>
+id: <%= h.inflection.dasherize(h.changeCase.lower(title)) %>
 title: <%= title %>
 sidebar_label: <%= title %>
 hide_title: false

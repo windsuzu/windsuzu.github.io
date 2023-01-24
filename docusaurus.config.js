@@ -4,6 +4,9 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
+const math = require("remark-math");
+const katex = require("rehype-katex");
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Jay's Domain",
@@ -37,6 +40,8 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           showLastUpdateTime: true,
           editUrl: "https://github.com/windsuzu/windsuzu.github.io/tree/master",
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
         },
         blog: {
           showReadingTime: true,
@@ -48,7 +53,15 @@ const config = {
       }),
     ],
   ],
-
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+      type: "text/css",
+      integrity:
+        "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+      crossorigin: "anonymous",
+    },
+  ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -74,17 +87,19 @@ const config = {
         },
         items: [
           {
-            type: "dropdown",
+            // type: "dropdown",
             position: "left",
-            label: "閱讀分享",
-            items: [
-              {
-                type: "doc",
-                label: "前端工程",
-                docId: "reading/frontend/intro",
-                sidebarId: "frontend",
-              },
-            ],
+            label: "閱讀前端",
+            type: "doc",
+            docId: "frontend/intro",
+            // items: [
+            //   {
+            //     type: "doc",
+            //     label: "前端工程",
+            //     docId: "reading/frontend/intro",
+            //     sidebarId: "frontend",
+            //   },
+            // ],
           },
           {
             type: "doc",
@@ -103,13 +118,13 @@ const config = {
       footer: {
         links: [
           {
-            title: "閱讀分享",
-            items: [
-              {
-                label: "前端工程",
-                to: "reading/frontend/intro",
-              },
-            ],
+            title: "閱讀前端",
+            // items: [
+            //   {
+            //     label: "前端工程",
+            //     to: "reading/frontend/intro",
+            //   },
+            // ],
           },
           {
             title: "筆記和部落格",
