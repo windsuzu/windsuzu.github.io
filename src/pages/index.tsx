@@ -9,13 +9,17 @@ import styles from "./index.module.css";
 
 function HomepageHeader(): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
-  const { isDarkTheme } = useColorMode();
+  const { colorMode } = useColorMode();
 
   return (
     <header className={clsx("hero", styles.heroBanner)}>
       <div className="container">
         <img
-          src={isDarkTheme ? "img/logo/logo-dark.png" : "img/logo/logo.png"}
+          src={
+            colorMode === "dark"
+              ? "img/logo/logo-dark.png"
+              : "img/logo/logo.png"
+          }
           alt="Site Logo"
           width="55%"
           style={{

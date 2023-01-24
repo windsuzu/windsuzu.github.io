@@ -30,6 +30,7 @@ const config = {
     defaultLocale: "zh-TW",
     locales: ["zh-TW"],
   },
+
   presets: [
     [
       "classic",
@@ -42,6 +43,13 @@ const config = {
           editUrl: "https://github.com/windsuzu/windsuzu.github.io/tree/master",
           remarkPlugins: [math],
           rehypePlugins: [katex],
+          sidebarItemsGenerator: async ({
+            defaultSidebarItemsGenerator,
+            ...args
+          }) => {
+            const sidebarItems = await defaultSidebarItemsGenerator(args);
+            return reverseSidebarItems(sidebarItems);
+          },
         },
         blog: {
           showReadingTime: true,
@@ -129,23 +137,14 @@ const config = {
           {
             title: "筆記和部落格",
             items: [
-              {
-                label: "學習筆記",
-                to: "learning/intro",
-              },
-              {
-                label: "部落格",
-                to: "/blog",
-              },
+              { label: "學習筆記", to: "learning/intro" },
+              { label: "部落格", to: "/blog" },
             ],
           },
           {
             title: "更多",
             items: [
-              {
-                label: "My GitHub",
-                href: "https://www.github.com/windsuzu",
-              },
+              { label: "My GitHub", href: "https://www.github.com/windsuzu" },
             ],
           },
         ],
@@ -159,3 +158,8 @@ const config = {
 };
 
 module.exports = config;
+
+// Reverse the sidebar items ordering (not including nested category items)
+function reverseSidebarItems(items) {
+  return items.reverse();
+}

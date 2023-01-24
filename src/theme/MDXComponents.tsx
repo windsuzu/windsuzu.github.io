@@ -1,7 +1,7 @@
 import MDXComponents from "@theme-original/MDXComponents";
-import { Figure } from "@site/src/components/Figure";
+import { CaptionFigure } from "@site/src/components/caption-figure";
 
 export default {
   ...MDXComponents,
-  figure: Figure,
+  fig: CaptionFigure,
 };
