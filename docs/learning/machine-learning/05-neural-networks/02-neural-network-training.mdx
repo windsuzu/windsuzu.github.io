@@ -1,0 +1,400 @@
+---
+id: neural-network-training
+title: Neural Network Training
+sidebar_label: 02 - Neural Network Training
+hide_title: false
+hide_table_of_contents: false
+tags: [machine learning, neural network]
+draft: false
+last_updated: 2019-10-24
+---
+
+神經網路已成為解決從圖像識別到自然語言處理等各種問題的重要工具。 因此，理解與神經網路相關的符號 (notation)、成本函數 (cost function) 和反向傳播算法 (backpropagation algorithm) 對於成功訓練和使用至關重要。 在本文我們還將探索反向傳播算法背後的概念，以便我們能夠更好地理解結果的含義。
+
+## Neural Networks Notation
+
+首先我們來定義一些 notation
+
+- $L$ = layers 數量
+- $s_l$ = 第 l 個 layer 共有幾個 units (不含 bias unit)
+- $K$ = 共有幾個 output units
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/neural_networks_notation_example.png)
+
+例如在上圖中
+
+```
+L = 4
+
+s_1 = 3
+s_2 = 5 = s_3
+s_4 = s_L = 4
+
+K = 4
+```
+
+- 我們又會說當 K 只有 2 時，稱作 **Binary classification**
+- K >= 3 時，稱作 **Multi-class classification**
+  - $h\_\theta(x) \in \mathbb{R}^k$
+  - $h\_\theta(x)\_k$ 則拿來代表第 k 個 output
+
+## Cost Function
+
+知道這些 notation 後我們來定義 neural networks 的 cost function
+
+其實就只是 **regularization logistic regression** 的改版而已
+
+我們還記得 Regularization logistic regression 的 cost function 是 :
+
+$$
+J(\theta) = -\frac{1}{m} \sum_{i=1}^m\begin{bmatrix}
+y^{(i)} \log(h_\theta(x^{(i)}))+(1-y^{(i)})\log(1-h_\theta(x^{(i)}))
+\end{bmatrix} + \frac{\lambda}{2m}\sum_{j=1}^n\Theta_j^2
+$$
+
+而 neural networks 的 cost function 為 :
+
+$$
+J(\theta) = -\frac{1}{m} \sum_{i=1}^m \sum_{k=1}^K \begin{bmatrix}
+y^{(i)}_k \log(h_\theta(x^{(i)})_k)+(1-y^{(i)}_k)\log(1-h_\theta(x^{(i)})_k)
+\end{bmatrix} + \frac{\lambda}{2m} \sum_{l=1}^{L-1} \sum_{i=1}^{sl}\sum_{j=1}^{sl+1}(\Theta_{j,i}^{(l)})^2
+$$
+
+- 在前項 part1 我們加入 $\sum_{k=1}^K$ 來加總 K 個 output nodes 的 cost
+- 在後項 part2 要想辦把加總出所有的 $\Theta$
+  - 所以當下的 $\Theta$ columns 等於 sl (# of nodes in current layer)
+  - 而 $\Theta$ rows 等於 sl + 1 (# of nodes in next layer)
+  - 於是就可以計算所有 $\Theta$ 的平方和
+
+:::note
+
+- 前面的 double sum 只是把每個 output nodes 的 cost 加總起來
+- 後面的 triple sum 只是把 networks 中所有 $\Theta$ 平方加總起來
+- triple sum 的 i 從 1 開始是為了去掉 bias unit
+
+:::
+
+## Backpropagation Algorithm
+
+為了要把 Cost function 最小化，得到更好的 $\Theta$ Update
+
+我們首先要先取得 $J(\Theta)$ 的微分 : $\frac{\partial}{\partial\Theta^{(l)}_{i,j}}J(\Theta)$
+
+而要計算出 $J(\Theta)$ 的微分，就是使用 **Backpropagation algorithm**
+
+### 步驟 1
+
+首先我們有這些 training sets
+
+$$
+\begin{Bmatrix}
+(x^{(1)}, y^{(1)}), \cdots (x^{(m)}, y^{(m)})
+\end{Bmatrix}
+$$
+
+### 步驟 2
+
+設定一個矩陣包含所有 l, i, j 等於 0
+
+應該是用來存放最終的 Cost function
+
+$$
+\Delta^{(l)}_{i,j} := 0
+$$
+
+### 步驟 3
+
+For `t = 1 to m` 各跑一次 **Forward Propogation**
+
+- $a^{(1)} := x^{(t)}$
+- 計算 $a^{(l)} \text{ for } l = 2, 3, \cdots L$
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/forward_propogation_layer4.png)
+
+### 步驟 4
+
+利用 $y^{(t)}$ 來計算 $\delta^{(L)} = a^{(L)} - y^{(t)}$
+
+其中的 $a^{(L)}$ 代表最後一個 layer 的每個 activation units (output nodes)
+
+而 $y^{(L)}$ 代表對應 output nodes 的真正解答
+
+所以計算出來的 $\delta^{(L)}$ 就是我們 output 與解答的誤差
+
+再來我們想從右到左**倒退**算出 l = L-1, L-2, ..., 2 的誤差
+
+:::note
+l = 1 不用算，因為他就是我們的 input，不會有任何誤差
+:::
+
+### 步驟 5
+
+利用 $\delta^{(l)} = ((\Theta^{l})^T\delta^{(l+1)}).*g'(z^{(l)})$ 來計算前面 layers 的 $\delta$
+
+計算當下 layer 的 $\delta$ 等於
+
+**當下的 $\Theta$ matrix 乘上 next layer 的 $\delta$ values**
+
+然後再 **element-wise 乘上 activation function $g'(z^{l})$**
+
+其中這個 g-prime 又可以寫成
+
+$$
+g'(z^{(l)}) = a^{(l)} .* (1-a^{(l)})
+$$
+
+如此一來我們就得到了 $\delta^{L}, \delta^{L-1}, \delta^{L-1}, \cdots, \delta^2$
+
+### 步驟 6
+
+將計算好的 $a$ 和 $\delta$ 帶回去 $\Delta^{(l)}_{i,j}$
+
+$$
+\Delta^{(l)}_{i,j} := \Delta^{(l)}_{i,j} + a^{(l)}_j \delta^{(l+1)}_i
+$$
+
+或者寫成 vectorization
+
+$$
+\Delta^{(l)} := \Delta^{(l)} + \delta^{(l+1)}(a^{l})^T
+$$
+
+最終我們得到了一個 $D^{(l)}_{i,j} = \frac{\partial}{\partial\Theta^{(l)}_{i,j}}J(\Theta)$
+
+D 可以說是 Neural networks 的 Gradient
+
+$$
+\begin{aligned}
+&\boldsymbol{\cdot} D^{(l)}_{i,j} := \frac{1}{m}(\Delta^{(l)}_{i,j}+\lambda\Theta^{(l)}\_{i,j}) &&\text{ if } j \neq 0\\
+
+&\boldsymbol{\cdot} D^{(l)}_{i,j} := \frac{1}{m}(\Delta^{(l)}_{i,j}) &&\text{ if } j = 0
+\end{aligned}
+$$
+
+## Backpropagation Intuition
+
+Backpropagation 看起來就像 black box 一樣，可能看不太懂
+
+所以有一些地方需要解釋
+
+### Slope
+
+以 binary classification (k = 1) 且不含 regularization 為例
+
+這個 neural network 的 cost 就等於 :
+
+$$
+cost(t) = y^{(t)}\log(h_\Theta(x^{(t)})) + (1-y^{(t)})\log(1-h_\Theta(x^{(t)}))
+$$
+
+而直觀的來看，$\delta^{l}_j$ 就是 $a^{(l)}_j$ 的差異 (error)
+
+$\delta^{(l)}_j = \frac{\partial}{\partial z^{l}_j} cost(t)$
+
+還記得 derivative 在 linear 跟 logistic regression 的 cost function 中所代表的是 slope 斜率嗎 ?
+
+而 slope 越大代表的就是我們的預測錯誤越大 !
+
+### Calculate $\delta$
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/back_propogation_delta_intuition.png)
+
+假設進行完 forward propagation 後，network 呈現上圖狀態
+
+計算 back propogation 其實可以想成是反過來的 forward propogation
+
+然後把 edge 想成是 $\Theta_{ij}$
+
+$$
+\delta^{(2)}_2 = \Theta^{(2)}_{12}\delta^{(3)}_1 + \Theta^{(2)}_{22}\delta^{(3)}_2
+$$
+
+或是另一個例子
+
+$$
+\delta^{(3)}_2 = \Theta^{(3)}_{12}\delta^{(4)}_1
+$$
+
+## Backpropogation Practices
+
+### Unrolling Parameters
+
+在實作 neural networks 時，我們會有這些 matrices
+
+$$
+\begin{aligned}
+\Theta^{(1)}, \Theta^{(2)}, \Theta^{(3)}, \cdots \\
+D^{(1)}, D^{(2)}, D^{(3)}, \cdots
+\end{aligned}
+$$
+
+但是很多 advanced optimization algorithm (例如 fminunc) 都需要你使用 vector 作為 inputs
+
+所以我們必須把這些 matrices 轉成 one long vector
+
+並在有需要時，將他們轉回 matrices
+
+在 Octave 中，Unroll matrix to vector 方法如下 :
+
+```matlab
+% Theta1 = 10x11 matrix
+% Theta2 = 10x11 matrix
+% Theta3 =  1x11 matrix
+
+thetaVector = [ Theta1(:); Theta2(:); Theta3(:)]
+
+% thetaVector = 231x1 vector
+```
+
+而轉回 matrices 的方法如下 :
+
+```matlab
+Theta1 = reshape(thetaVector(1:110), 10, 11)
+Theta2 = reshape(thetaVector(111:220), 10, 11)
+Theta3 = reshape(thetaVector(221:231), 1, 11)
+```
+
+在 fminunc 實作中
+
+我們會將 $\Theta^{(1)}, \Theta^{(2)}, \Theta^{(3)}, \cdots$ unroll 成 `initialTheta`
+
+而在 costfunction 中把他轉回 matrices
+
+並且通過 forward propogation / backpropogation
+
+計算出 $D^{(1)}, D^{(2)}, D^{(3)}, \cdots$ 和 $J(\Theta)$
+
+而這些 D 也要 unroll 成 `gradientVec` 傳回
+
+### Gradient Checking
+
+Backpropogation 有時可以發生一些意外的小 bugs
+
+但我們可以使用 Gradient Checking 來確保 backpropogation 正確運作
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/gradient_checking_graph.png)
+
+上圖假設 $\Theta$ 只是一個 real number
+
+藍線是我們算出來的 $D$ gradient
+
+而我們在 $\Theta$ 左右兩邊各選一個 $\epsilon$ 所連起的紅線
+
+將會是一個非常接近正確值的 gradient
+
+這條線可以透過以下公式算出
+
+$$
+\frac{\partial}{\partial\Theta}J(\Theta) \approx \frac{J(\Theta+\epsilon) - J(\Theta-\epsilon)}{2\epsilon}
+$$
+
+若 $\Theta$ 是多個矩陣時
+
+我們要針對每個 $\Theta_j$ 做一次 gradient checking
+
+$$
+\frac{\partial}{\partial\Theta_j}J(\Theta) \approx
+\frac{J(\Theta_1,\cdots,\Theta_j+\epsilon,\cdots,\Theta_n) - J(\Theta_1,\cdots,\Theta_j-\epsilon,\cdots,\Theta_n)}{2\epsilon}
+$$
+
+通常來說 $\epsilon = 10^{-4}$ 即可解決問題
+
+以下是 Octave 實作 Gradient checking :
+
+```matlab
+epsilon = 1e-4;
+for i = 1:n,
+  thetaPlus = theta;
+  thetaPlus(i) += epsilon;
+  thetaMinus = theta;
+  thetaMinus(i) -= epsilon;
+  gradApprox(i) = (J(thetaPlus) - J(thetaMinus))/(2*epsilon)
+end;
+```
+
+計算完後，我們就可以去比較是否 `gradApprox ≈ deltaVector`
+
+當你一旦確定好自己的 backpropogation 沒有 bugs 且正常運作
+
+就應該要關掉 Gradient checking，因為他會讓程式變得非常慢 !
+
+### Random Initialization
+
+在 Regression 設定 $\theta$ 全為 0 是可以正常運作的
+
+但在 Neural networks 設定所有 $\Theta$ 為 0 是**無法運作**的 !
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/zero_initialization.png)
+
+假設上圖我們藍、紅、綠的 $\Theta$ 都設為 0
+
+那麼 $a^{(2)}_1, a^{(2)_2}$ 就會產生一樣的結果
+
+甚至在 $\delta$ 和 gradient 的結果都會一樣
+
+這讓我們的 $\Theta$ 就算怎麼更新，都會變成一樣
+
+就像在算單個 logistic regression 但多跑了好幾個 redundant 的 features
+
+這將會把 neural networks 的重點及優點全部都抵消掉了
+
+#### Symmetric breaking
+
+上面這個問題我們稱為 Symmetric breaking
+
+要解決他我們將初始化所有的 $\Theta$ 隨機落於 $[-\epsilon, \epsilon]$ 區間
+
+實作如下 :
+
+```matlab
+% If the dimensions of Theta1 is 10x11, Theta2 is 10x11 and Theta3 is 1x11.
+
+Theta1 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta2 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta3 =  rand(1,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+```
+
+:::caution 注意
+以上的 $\epsilon$ 不等於 gradient checking 的 $\epsilon$
+:::
+
+## Summary
+
+首先決定一個 neural networks 的 architecture 很重要
+
+我們必須決定以下事情 :
+
+- number of input units
+  - dimension of features $x^{(i)}$
+- number of output units
+  - number of classes
+- number of units in each hidden layers
+  - more the better, 但要考慮 computation cost
+- Default : 1 hidden layer
+  - 如果你有大於一個 hidden layer
+  - 最好每層的 units 數都要一致
+
+再來就可以來 Training a Neural Network :
+
+1. 隨機定義 Weights $\Theta$
+2. 用 forward propogation 取得 $h_\Theta(x^{(i)})$
+3. 計算 cost function
+4. 用 backpropogation 取得 partial derivatives
+5. Gradient checking 確定 backpropogation 計算正確然後關掉 checking
+6. 用 gradient descent 或其他算法找到能 minimize cost function 的 weights $\Theta$
+
+通常在剛接觸 neural networks 時是可以用 for loop 來 implement 的 :
+
+```matlab
+for i = 1:m
+    forward and back propagation using example (x(i),y(i))
+    Get activations a(l) and delta terms d(l) for l = 2,...,L
+```
+
+Neural networks 的 cost function 是 non-convex 的
+
+但通常找到的 local minimum 都還不錯 !
+
+![](/img/learning/machine-learning/05-neural-networks/02-neural-network-training/neural_networks_cost_graph.png)
+
+上圖就是一個 neural networks 的 visualization
