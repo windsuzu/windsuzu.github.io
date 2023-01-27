@@ -1,0 +1,148 @@
+---
+id: python-vectorization
+title: Python Vectorization
+sidebar_label: 3 - Python Vectorization
+hide_title: false
+hide_table_of_contents: false
+tags: [deep-learning, neural-networks, python, vectorization]
+draft: false
+last_updated: 2019-10-28
+---
+
+這篇文章主要介紹如何使用 Vectorization 來加速 Python 的數值運算，以及如何將 Logistic Regression 的 for-loops 轉換成 vectorization，以及如何將 gradient (backpropogation) 也進行向量化。Vectorization 可以大大提高數值運算的速度，甚至可以提高數百倍的速度。因此在編寫程式時，建議在可以使用 vectorization 時就應盡量避免使用 for loop 。
+
+## Vectorization
+
+以下用一個 Python 例子來解釋 vectorization 的好處：假設我們要求 $w^Tx$，而 $w, x$ 都是 1000000 \* 1 的矩陣。
+
+1. 這是一個 for loop 方法：
+
+```python
+w = np.random.rand(1000000)
+x = np.random.rand(1000000)
+
+c = 0
+for i in range(1000000):
+    c += w[i] * x[i]
+
+# time = 474.29 ms
+```
+
+2. 這是一個 vectorization 的方法：
+
+```python
+import numpy as np
+
+c = np.dot(w, x)
+
+# time = 1.5 ms
+```
+
+這些向量化的方法是利用 CPU 或 GPU 的 SIMD 平行指令，可以看到 vectorization 比 for loop 快上了三百多倍，因此以後在編寫程式時應盡量避免使用 for loop，而盡可能使用 vectorization。
+
+:::tip
+"Whenever possible, avoid explicit for-loops"
+:::
+
+# Vectorizing Logistic Regression
+
+我們將 forward propogation 的 for-loops 試著轉成 vectorization，利用 for-loops 我們必須要這樣做：
+
+$$
+\begin{aligned}
+&z^{(1)} = w^Tx^{(1)}+b
+&&z^{(2)} = w^Tx^{(2)}+b
+&&&z^{(3)} = w^Tx^{(3)}+b
+&&&& ...\\
+&a^{(1)} = \sigma(z^{(1)})
+&&a^{(2)} = \sigma(z^{(2)})
+&&&a^{(3)} = \sigma(z^{(3)})
+&&&& ...
+\end{aligned}
+$$
+
+我們知道 X 是一個 nx \* m 的矩陣
+
+$$
+\begin{aligned}
+X = \begin{bmatrix}
+|&|&&|\\
+x^{(1)}&x^{(2)}&\cdots&x^{(m)}\\
+|&|&&|\\
+\end{bmatrix}
+\end{aligned}
+$$
+
+我們可以將整個矩陣直接跟 $w^T$ 相乘，得到一個 1 \* m 的 $Z$ 矩陣
+
+$$
+\begin{aligned}
+Z &= \begin{bmatrix}z^{(1)} & z^{(2)} & \cdots z^{(m)}\end{bmatrix}\\
+&= w^TX + b\\
+&= \begin{bmatrix}w^Tx^{(1)}+b & w^Tx^{(2)}+b & \cdots w^Tx^{(m)}+b\end{bmatrix}
+\end{aligned}
+$$
+
+然後再計算出 1 \* m 的 A 矩陣
+
+$$
+A = \begin{bmatrix}a^{(1)} & a^{(2)}& \cdots a^{(m)}\end{bmatrix} = \sigma(Z)
+$$
+
+在 python 中，Z 的運算如下
+
+```python
+Z = np.dot(w.T, X) + b
+```
+
+## Vectorizing Gradient Output
+
+現在我們來將 gradient (backpropogation) 的 $dZ, dw, db$ 也進行向量化，$dZ$ 其實就是矩陣 A 和矩陣 y 相減。
+
+$$
+\begin{aligned}
+dZ &= \begin{bmatrix}dz^{(1)} & dz^{(2)} & \cdots & dz^{(m)}\end{bmatrix}
+\\ &= A - Y
+\\ &= \begin{bmatrix}a^{(1)} - y^{(1)} & a^{(2)} - y^{(2)} & \cdots & a^{(m)} - y^{(m)}\end{bmatrix}
+\end{aligned}
+$$
+
+我們將 dw1, dw2, ... 組合成為一個 nx \* 1 的 dw 矩陣
+
+$$
+\begin{aligned}
+dw &= \frac{1}{m}X dZ^T
+\\ &= \frac{1}{m}
+\begin{bmatrix}
+|&|&&|\\
+x^{(1)}&x^{(2)}&\cdots&x^{(m)}\\
+|&|&&|\\
+\end{bmatrix}
+\begin{bmatrix}
+dZ^{(1)}\\\vdots\\dZ^{(m)}
+\end{bmatrix}
+\end{aligned}
+$$
+
+而 db 則是用 sum 的方法乘起來平均
+
+$$
+\begin{aligned}
+db &= \frac{1}{m} \sum_{i=1}^m dZ^{(i)}
+\\ &= \frac{1}{m} \text{np.sum}(dZ)
+\end{aligned}
+$$
+
+現在我們就能用一個 vectorization 的方法一次計算一個 gradient descent 的情形
+
+```python
+Z = np.dot(w.T, X) + b
+A = sigmoid(Z)
+
+dZ = A - y
+dw = 1/m * X * dZ.T
+db = 1/m * np.sum(dZ)
+
+w = w - a * dw
+b = b - a * db
+```

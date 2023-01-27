@@ -1,0 +1,209 @@
+---
+id: trajectory-planning
+title: Trajectory Planning
+sidebar_label: 4 - Trajectory Planning
+hide_title: false
+hide_table_of_contents: false
+tags: [robotic-navigation-and-exploration, motion-planning]
+draft: false
+last_updated: 2020-05-10
+---
+
+本文將描述如何使用 State lattice planning 和 Frenet Coordinate 來計算自駕車的軌跡。State lattice planning 透過結合空間和時間，採樣軌跡並計算成本，再檢查軌跡是否可用，並選擇成本最低的軌跡。Frenet Coordinate 將車子位置投影到二維路徑，求取一階、二階微分和最低成本。最後，Trajectory Planning 考慮動態障礙物，計算每個時間點的運動資訊，找出最低成本的軌跡。
+
+### State Lattices Planning
+
+一般的自走車，不需要考慮環境變化，只需要預測障礙與終點規劃，所以可以使用 nontemporal state lattice 來規劃曲線。
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/lattices_planning.png"
+  caption="Lattices Planning"
+/>
+
+自駕車則需要考慮的周遭動態的變化，所以有人發明了結合 temporal 和 spatial 的規劃方法
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/state_lattices_planning.png"
+  caption="State Lattices Planning"
+/>
+
+這就是 State lattice planning
+
+1. 在結合的**空間**及**時間**中，採樣軌跡
+2. 計算每條軌跡的代價
+   - 代價可以有很多種
+     - Objective achievement cost (目標與終點距離)
+     - Lateral offset cost (遵守交通規則)
+     - Collision cost (避免碰撞)
+     - Longitude jerk cost (舒服)
+     - Lateral acceleration cost (舒服)
+3. 確認軌跡是否能夠使用 (有無避障)，並選擇最低代價的那條軌跡
+
+下圖是一個一維道路的 spatiotemporal state lattice
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/spatiotemporal_state_lattices.png"
+  caption="Spatiotemporal State Lattices"
+/>
+
+- $l$: 代表空間
+- $t$: 代表時間
+- $\Delta l, \Delta t$: 代表空間和時間的 resolution
+- $\Delta l_{\text{max}}, \Delta t_{\text{max}}$: 代表空間和時間的 constraints
+
+其中線段的斜率代表了縱向的速度，例如 $v_0$ 線段的速度為 2，而 $v_1$ 線段的速度為 1。右上的藍色限制區塊，展示了套用平滑的規劃曲線結果。
+
+#### Example
+
+假設紅色車子想要超越藍色車子，我們可以將所有條件投射到 spatiotemporal state lattice
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/spatiotemporal_state_lattices1.png"
+  caption="Spatiotemporal State Lattices"
+/>
+
+讓我們可以直接在 lattice 上進行規劃
+
+- 平形四邊形的寬度: 紅色車子長度
+- 平形四邊形的斜率: 紅色車子速度
+
+藍色車子可以選擇加速或減速，所以代表在 lattice 上的某個**時間點**，可以有好幾種不同的**速度選擇**
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/spatiotemporal_state_lattices2.png"
+  caption="Spatiotemporal State Lattices"
+/>
+
+我們對這些採樣進行平滑計算並處理，得到了加速或減速各別最佳 (最小 cost) 的結果
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/spatiotemporal_state_lattices3.png"
+  caption="Spatiotemporal State Lattices"
+/>
+
+所以藍色線段會選擇超車，而黃色線段會選擇跟車
+
+### Frenet Coordinate
+
+看完一維空間後，再來要考慮蜿蜒的二維空間
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/frenet_coordinate.png"
+  caption="Frenet Coordinate"
+/>
+
+Frenet coordinate 將車子位置投影到二維路徑中
+
+- $l$: 代表路徑方向的位移
+- $r$: 代表與路徑的橫向誤差
+
+我們的目標是從路徑點和參數，計算出該參數之下的座標點
+
+- 路徑點: $\left(X_{s}(l), Y_{s}(l)\right)$
+- 參數: $(l, r)$
+- 目標座標: $(x(t), y(t))$
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/frenet_coordinate2.png"
+  caption="Frenet Coordinate"
+/>
+
+從圖形中可以推出以下公式 (轉換方程: Frenet to standard coordinate)
+
+$$
+\begin{aligned}
+&x(t)=X(l)-r Y^{\prime}(l)\\
+&y(t)=Y(l)+r X^{\prime}(l)
+\end{aligned}
+$$
+
+我們可以進一步對轉換方程，求取其一階、二階微分
+
+$$
+\begin{aligned}
+&\dot{x}(t)=\dot{l} X^{\prime}(l)-\dot{r} Y(l)-r \dot{l} Y^{\prime}(l)\\
+&\dot{y}(t)=\dot{l} Y^{\prime}(l)+\dot{r} X(l)+r \dot{l} X^{\prime}(l)\\\\
+
+&\ddot{x}(t)=\ddot{l} X^{\prime}+\ddot{l}^{2} X^{\prime \prime}-\ddot{r} Y-(2 \dot{r} \dot{l}+r \ddot{l}) Y^{\prime}-\dot{r} \dot{l}^{2} Y^{\prime \prime} \\
+&\ddot{y}(t)=\ddot{l} Y^{\prime}+\ddot{l}^{2} Y^{\prime \prime}-\ddot{r} \mathrm{X}-(2 \dot{r} \dot{l}+r \ddot{l}) \mathrm{X}^{\prime}-\dot{r} \dot{l}^{2} \mathrm{X}^{\prime \prime}
+\end{aligned}
+$$
+
+### Trajectory Generation
+
+現在我們來生成二維的軌跡，定義車子狀態、縱向狀態、橫向狀態
+
+- Vehicle States
+
+  - $[x, y, \theta, v, a]$
+
+- Longitude States
+
+  - $l$: longitude distance
+  - $\dot{l}$: longitude speed
+  - $\ddot{l}$: longitude acceleration
+
+- Lateral States
+  - $r$: lateral offset
+  - $\dot{r}$: lateral speed
+  - $\ddot{r}$: lateral acceleration
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/trajectory_generation1.png"
+  caption="Trajectory Generation"
+/>
+
+分別定義起始時 (t0) 的狀態，還有終點時 (t1) 的狀態
+
+$$
+\begin{aligned}
+\text{State at time } t_0:
+\left\{\left(r_{0}, \dot{r}_{0}, \ddot{r}_{0}\right),\left(l_{0}, \dot{l}_{0}, \ddot{l}_{0}\right)\right\}
+\\
+\text{State at time } t_1:
+\left\{\left(r_{1}, \dot{r}_{1}, \ddot{r}_{1}\right),\left(l_{1}, \dot{l}_{1}, \ddot{l}_{1}\right)\right\}
+\end{aligned}
+$$
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/trajectory_generation2.png"
+  caption="Trajectory Generation"
+/>
+
+將開始與結束作為 curve function 的 boundary condition
+
+- 符合 longitude trajectory ($l(t)$) 的 boundary condition
+
+$$
+\begin{aligned}
+&l\left(t_{0}\right)=l_{0}, l\left(t_{1}\right)=l_{1}\\
+&\dot{l}\left(t_{0}\right)=\dot{l}_{0}, \dot{l}\left(t_{1}\right)=\dot{l}_{1}\\
+&\ddot{l}\left(t_{0}\right)=\ddot{l}_{0}, \ddot{l}\left(t_{1}\right)=\ddot{l}_{1}
+\end{aligned}
+$$
+
+- 符合 lateral trajectory ($r(t)$) 的 boundary condition
+
+$$
+\begin{aligned}
+&r\left(t_{0}\right)=r_{0}, r\left(t_{1}\right)=r_{1}\\
+&\dot{r}\left(t_{0}\right)=\dot{r}_{0}, \dot{r}\left(t_{1}\right)=\dot{r}_{1}\\
+&\ddot{r}\left(t_{0}\right)=\ddot{r}_{0}, \ddot{r}\left(t_{1}\right)=\ddot{r}_{1}
+\end{aligned}
+$$
+
+最終我們就可以將任意時間點 $t$ 帶入 curve function 求得 longitude 和 lateral 的值： $l=l(t), r=r(t)$。 接著就可以用剛剛在 Frenet 推導的公式，將這些在 Frenet 的狀態轉換到標準座標系上得到目標軌跡。
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/frenet_to_standard.png"
+  caption="Frenet to Standard"
+/>
+
+### Trajectory Planning Example
+
+以下是一個在二維情況下，進行軌跡規劃的結果
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/trajectory_planning_example.png"
+  caption="Trajectory Planning Example"
+/>

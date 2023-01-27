@@ -1,0 +1,237 @@
+---
+id: regularization
+title: Regularization
+sidebar_label: 4 - Regularization
+hide_title: false
+hide_table_of_contents: false
+tags: [machine-learning, regularization]
+draft: false
+last_updated: 2019-10-15
+---
+
+機器學習中，Overfitting 是一個常見的問題。當我們搜索 Hypothesis 來擬合訓練集時，可能會遇到 Underfit、Just right 和 Overfit 這三種情況。我們將 Overfitting 的定義為：太多的 features 使得求得的 Hypothesis 在 training data 上有很好的分數，但卻不能讓 test set 或真實數據使用。
+
+要避免 Overfitting，有兩種方法：減少 features 數量，或者使用 Regularization。 Regularization 是留下所有的 features，但降低 theta 的 magnitude，這樣就不用擔心會刪除對 training 有益的 features。
+
+為了減少多餘的 features 對 Overfitting 的影響，我們只需要將這些 features 在 cost function 中提高代價，使它們對 hypothesis 的影響降低即可。當我們將 Regularization 的公式套入 linear regression 和 logistic regression 中時，可以有效的降低 Overfitting 的影響。
+
+## The Problem of Overfitting
+
+當我們要尋找 Hypothesis 來 fit 我們的 training set 時
+
+可以遇到三種情況
+
+<fig
+  src="/img/learning/machine-learning/04-regularization/linear_regression_overfitting.png"
+  caption="Linear Regression Overfitting"
+/>
+
+1. **Underfit \(High bias\)**
+   - Hypothesis 不是很好的 fit 這些 example data
+2. **Just right**
+   - Hypothesis 很好的 fit 這些 example data
+3. **Overfit \(High variance\)**
+   - Hypothesis 太過 "鑽牛角尖" 於每一個 training set
+
+我們為 Overfitting 下一個定義 :
+
+太多的 features，讓求得的 Hypothesis 在 training data 得到不錯分數 \(cost function J 接近 0\)
+
+但完全沒辦法讓 test set 或是真實資料套入使用
+
+同樣的事情可以發生在 logistic regression :
+
+<fig
+  src="/img/learning/machine-learning/04-regularization/logistic_regression_overfitting.png"
+  caption="Logistic Regression Overfitting"
+/>
+
+會造成 overfitting 的原因就是因為 features 使用太多了
+
+但又不知道哪些 features 可以完全消除掉 \(可能對 training 有益\)
+
+有兩種方法可以解決 :
+
+1. 減少 features 數量
+   - 手動選擇不要的 features
+   - 使用 **model selection algorithm** \(later in other course\)
+2. Regularization
+   - 留下全部 features，但降低 theta's 的 magnitude
+   - 這方法就可以不用擔心會不會刪掉對 training 有益的 features
+
+## Cost Function
+
+若我們想降低多餘 \(可能\) 的 features 所帶來的 overfitting 影響
+
+我們只要將這些 features 在 cost function 的代價提高，讓他們對 hypothesis 的影響下降就好
+
+以 $\theta_0 + \theta_1x + \theta_2x^2 + \theta_3x^3 + \theta_4x^4$ 為例
+
+我們將他的 Cost function 調整為
+
+$$
+\min_\theta \frac{1}{2m}\sum_{i=1}^m(h_\theta(x^{(i)})-y^{(i)})^2 {\color{red}+1000\cdot \theta_3^2+1000\cdot\theta_4^2}
+$$
+
+新的 cost function 就可以在不去除 $\theta_3$ 跟 $\theta_4$ 的情況
+
+讓兩者對 hypothesis 的影響降低
+
+1000 可以是其他較大數值，但不能夠過大
+
+不然會使得 $\theta_3$ 跟 $\theta_4$ 直接不見
+
+<fig
+  src="/img/learning/machine-learning/04-regularization/regularization_intuition.png"
+  caption="Regularization Intuition"
+/>
+
+右上的**紫線**就是在 implement regularization 過後的新 hypothesis function
+
+所以除了 $\theta_0$ 不用變更以外
+
+我們將 regularization 套用到所有的 $\theta$ \(因為我們也不知道到底是哪一個 feature 造成 overfitting\)
+
+得到了新的公式 :
+
+$$
+J(\theta) = \frac{1}{2m}\sum_{i=1}^m(h_\theta(x^{(i)})-y^{(i)})^2+\lambda\sum_{j=1}^n \theta_j^2
+$$
+
+- $\lambda$ 為 **regularization parameter**
+  - 將會作為 $\theta$ 對於整個 cost function 的影響指標
+- 只是多了後面一個式子，就可以讓 overfitting 的影響減少
+- 但要小心，若 $\lambda$ 非常大的話
+  - 會讓每個 $\theta$ 都變為 0
+  - 變回 underfit 的狀況
+
+## Regularized Linear Regression
+
+現在我們將 regularization 的公式套入 linear regression 和 logistic regression
+
+先從 linear regression 的 gradient descent 開始
+
+### Linear regression - gradient descent
+
+我們會改變所有 $\theta$ 但是 $\theta_0$ 要維持原本的樣子
+
+$$
+\begin{aligned}
+&\text{Repeat \{}\\
+&\theta_0 := \theta_0 - \alpha \frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_0^{(i)}\\
+&\theta_j := \theta_j - \alpha \left[\left(\frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_j^{(i)}\right)+\frac{\lambda}{m}\theta_j\right] && j \in \begin{Bmatrix}1, 2, ... n
+\end{Bmatrix}\\
+&\text{\}}
+\end{aligned}
+$$
+
+我們發現第二行 $\theta_j$ 的公式可以在簡化成這樣 :
+
+$$
+\theta_j := \theta_j(1-\alpha\frac{\lambda}{m})-\alpha\frac{1}{m}\sum_{i=1}^m(h_\theta(x^{(i)}) - y^{(i)})x_j^{(i)}
+$$
+
+可以發現 $1-\alpha\frac{\lambda}{m}$ 永遠都會是小於 1 的正數
+
+所以負號的前一項能表示每回合的 $\theta_j$ 會固定變小
+
+而後面一項跟原本的 gradient descent 一模一樣
+
+### Linear regression - Normal equation
+
+要將 regularization 加入 normal equation 中
+
+只需簡單加入 $\lambda \cdot L$ 即可，其中 $L$ 為一個像是 identity matrix 但第一項為 0 的特殊矩陣
+
+這個矩陣為一個 $(n-1)\times(n-1)$ 的矩陣
+
+有一個 0 的原因就是不想要變動到 $\theta_0$ 的值
+
+$$
+\begin{aligned}
+\theta = \left(X^TX + \lambda \cdot \begin{bmatrix}
+0 \\
+& 1 \\
+&& 1 \\
+&&& \ddots \\
+&&&&1
+\end{bmatrix} \right)^{-1}X^Ty
+\end{aligned}
+$$
+
+將 regularization 套入 normal equation 也有另一個好處
+
+之前說過若 features 大於 training examples 數量太多
+
+則 $X^TX$ 有可能會為 non-invertible
+
+但現在有了 $\lambda \cdot L$
+
+$X^TX + \lambda \cdot L$ 就一定是 invertible 的矩陣了 !
+
+## Regularized Logistic Regression
+
+我們一樣來將 regularization 套用在 logistic regression
+
+讓 overfitting 的藍線變為正常的紫線 hypothesis
+
+<fig
+  src="/img/learning/machine-learning/04-regularization/logistic_regularization.png"
+  caption="Regularized logistic regression"
+/>
+
+一樣在 logistic cost function
+
+$$
+J(\theta) = -\frac{1}{m}\sum_{i=1}^m[y^{(i)}\log(h_\theta(x^{(i)})) + (1-y^{(i)})\log(1-h_\theta(x^{(i)}))]
+$$
+
+的最後加上 regularization 的式子得到 :
+
+$$
+J(\theta) = -\frac{1}{m}\sum_{i=1}^m[y^{(i)}\log(h_\theta(x^{(i)})) + (1-y^{(i)})\log(1-h_\theta(x^{(i)}))]
++ \frac{\lambda}{2m}\sum_{j=1}^n\theta_j^2
+$$
+
+注意我們一樣不想變動到 $\theta_0$
+
+所以 regularization 的 summation 從 1 開始 !
+
+接著套進 gradient descent
+
+$$
+\begin{aligned}
+&\text{Repeat \{}\\
+&\theta_0 := \theta_0 - \alpha \frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_0^{(i)}\\
+&\theta_j := \theta_j - \alpha \left[\left(\frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_j^{(i)}\right)+\frac{\lambda}{m}\theta_j\right] && j \in \begin{Bmatrix}1, 2, ... n
+\end{Bmatrix}\\
+&\text{\}}
+\end{aligned}
+$$
+
+其實跟 linear regression 一樣
+
+只是 $h_\theta(x) = \frac{1}{1+e^{-\theta^Tx}}$
+
+## Advanced optimization
+
+在 Octave 實作 logistic regression 的 advanced optimization 時
+
+這些 code 又該怎麼跟 regularization 一起實作 :
+
+$$
+\begin{aligned}
+&\text{function [jVal, gradient] = costFunction(theta)} \\
+&\text{jVal = }[ \text{code to compute } J(\theta) ]; \\
+\rightarrow &J(\theta) = -\frac{1}{m}\sum_{i=1}^m[y^{(i)}\log(h_\theta(x^{(i)})) + (1-y^{(i)})\log(1-h_\theta(x^{(i)}))]
++ \frac{\lambda}{2m}\sum_{j=1}^n\theta_j^2\\
+&\text{gradient(1) = } [ \text{code to compute } \frac{d}{d\theta_0}J(\theta)]; \\
+\rightarrow &\frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_0^{(i)} \\
+&\text{gradient(2) = } [ \text{code to compute } \frac{d}{d\theta_1}J(\theta)]; \\
+\rightarrow &\frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_1^{(i)} + \frac{\lambda}{m}\theta_1 \\
+&\text{gradient(3) = } [ \text{code to compute } \frac{d}{d\theta_2}J(\theta)]; \\
+\rightarrow &\frac{1}{m} \sum_{i=1}^m(h_\theta(x^{(i)})- y^{(i)})x_2^{(i)} + \frac{\lambda}{m}\theta_2 \\
+\vdots\\
+&\text{gradient(n+1) = } [ \text{code to compute } \frac{d}{d\theta_n}J(\theta)]; \\
+\end{aligned}
+$$

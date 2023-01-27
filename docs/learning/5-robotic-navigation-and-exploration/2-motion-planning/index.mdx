@@ -1,0 +1,16 @@
+---
+id: motion-planning
+title: Motion Planning
+sidebar_label: 2 - Motion Planning
+hide_title: false
+hide_table_of_contents: false
+tags: [robotic-navigation-and-exploration]
+draft: false
+last_updated: 2020-05-10
+---
+
+這個章節將會介紹 Motion Planning，包括 Path Planning、Curve Interpolation 和 Trajectory Planning 三部份：Path Planning 是將地圖轉換成以交叉點為節點或離散網格為節點的動作，以便在地圖上的行走；Curve Interpolation 是用一個 curve function 來連接 weight points 以達到路徑的平滑與光滑，同時也可以改變路徑的參數，如起點、終點、坡度等；Trajectory Planning 是考慮時間資訊，根據預測 obstacle 的未來行動來規劃每個時間點的動作，以及尋找最佳路徑，使得機器人可以安全且有效地完成任務。
+
+import DocCardList from "@theme/DocCardList";
+
+<DocCardList />

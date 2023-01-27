@@ -1,0 +1,297 @@
+---
+id: curve-interpolation
+title: Curve Interpolation
+sidebar_label: 3 - Curve Interpolation
+hide_title: false
+hide_table_of_contents: false
+tags: [robotic-navigation-and-exploration, motion-planning]
+draft: false
+last_updated: 2020-05-10
+---
+
+Curve Interpolation 將會用一個曲線函數連接節點，使得路徑變得平滑。 這個章節會介紹幾種曲線函數，例如 Explicit、Implicit 和 Parametric，並針對 Parametric Cubic Polynomial Curves 和 Cubic Interpolating Curves 進行了深入解釋，最後也會提到一些特別求曲線的方式，例如 Hermite Curves, Bezier Curves 等。
+
+### Representation of Curves
+
+$y = f(x) \text{ or } x = g(y)$
+
+- Explicit
+  - 用函式來表達 curve 上每個點 (x, y) 的關係
+  - 有的垂直線、圓形可能無法表達
+
+$$
+\begin{aligned}
+&f(x, y) = 0\\
+\text{Line: }&ax+by+c=0\\
+\text{Circle: }&x^2+y^2-r^2=0
+\end{aligned}
+$$
+
+- Implicit
+  - 用 f(x, y) 來表示，每個 curve 上的點 (x, y) 需滿足 f(x, y) = 0
+  - 需要把所有點都帶進 f(x, y) 去看是否等於 0
+
+$$
+p(u) = \begin{bmatrix}
+x(u) & y(u)
+\end{bmatrix}^T
+$$
+
+- Parametric
+  - 用 u 來表示 curve 上的每個點 (x, y)
+  - 方便產生、控制 curve
+  - 每個點對 u 做偏微分，可以得到該點切線方向 (trace 時每個點的速度)
+
+### Parametric Cubic Polynomial Curves
+
+我們可以用 polynomial (degree = n+1) 來表示 parametric curves： $\mathbf{p}(u)=c_{0}+c_{1} u+c_{2} u^{2}+\cdots c_{n} u^{n}$，實作上只需要到 **cubic polynomial curve** 即可
+
+$$
+\begin{aligned}
+\mathbf{p}(u)=c_{0}+c_{1} u+c_{2} u^{2}+c_{3} u^{3}=\mathbf{u}^{T} \mathbf{c} &&(0 \le u \le 1)
+\end{aligned}
+$$
+
+我們會用 **least square curve fitting** 來解出所有的 $c_i$。給定一個點得到 (x, y) 分別兩個方程式，所以會有 8 個未知數，需要至少 4 個點才能解出 (底下聯立式 \* 4)
+
+$$
+\begin{aligned}
+&x(u)=c_{x 0}+c_{x 1} u+c_{x 2} u^{2}+c_{x 3} u^{3}\\
+&y(u)=c_{y 0}+c_{y 1} u+c_{y 2} u^{2}+c_{y 3} u^{3}
+\end{aligned}
+$$
+
+### Least Square Curve Fitting
+
+給定四個座標點 (control points, weight points)，四個點給定的 u 值平均分布在 curve 上，於是就可以得到以下公式 (從 cubic polynomial curve 推得)
+
+$$
+\begin{aligned}
+&\mathbf{p}_{0}=\mathbf{p}(0)=\mathbf{c}_{0} \\
+&\mathbf{p}_{1}=\mathbf{p}\left(\frac{1}{3}\right)=\mathbf{c}_{0}+\frac{1}{3} \mathbf{c}_{1}+\left(\frac{1}{3}\right)^{2} \mathbf{c}_{2}+\left(\frac{1}{3}\right)^{3} \mathbf{c}_{3}\\
+&\mathbf{p}_{2}=\mathbf{p}\left(\frac{2}{3}\right)=\mathbf{c}_{0}+\frac{2}{3} \mathbf{c}_{1}+\left(\frac{2}{3}\right)^{2} \mathbf{c}_{2}+\left(\frac{2}{3}\right)^{3} \mathbf{c}_{3}\\
+&\mathbf{p}_{3}=\mathbf{p}(\mathbf{1})=\mathbf{c}_{0}+\mathbf{c}_{1}+\mathbf{c}_{2}+\mathbf{c}_{3}
+\end{aligned}
+$$
+
+可以寫成 $\mathbf{P}=\mathbf{A c}$ 的格式，其中
+
+$$
+\begin{aligned}
+\mathbf{P}=\left[\begin{array}{c}
+\mathbf{p}_{0} \\
+\mathbf{p}_{1} \\
+\mathbf{p}_{2} \\
+\mathbf{p}_{3}
+\end{array}\right] \quad \mathbf{c}=\left[\begin{array}{c}
+\mathbf{c}_{0} \\
+\mathbf{c}_{1} \\
+\mathbf{c}_{2} \\
+\mathbf{c}_{3}
+\end{array}\right]\quad
+\mathbf{A}=\left[\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+1 & \frac{1}{3} & \left(\frac{1}{3}\right)^{2} & \left(\frac{1}{3}\right)^{3} \\
+1 & \frac{2}{3} & \left(\frac{2}{3}\right)^{2} & \left(\frac{2}{3}\right)^{3} \\
+1 & 1 & 1 & 1
+\end{array}\right]
+\end{aligned}
+$$
+
+接著把 $\mathbf{P}=\mathbf{A c}$ 兩邊都乘上 $\mathbf{A}^{-1}$ 就可以得到 $\mathbf{c}$
+
+$$
+\begin{aligned}
+&\mathbf{A}^{-1} = \mathbf{M}_{\mathbf{I}}\\
+&\mathbf{c}=\mathbf{M}_{\mathbf{I}} \mathbf{P}\\
+&\mathbf{p}(u)=\mathbf{u}^{T} \mathbf{c}=\mathbf{u}^{T} \mathbf{M}_{\mathbf{I}} \mathbf{P}
+\end{aligned}
+$$
+
+注意，因為要滿足 4 維的矩陣乘法，所以把 x, y 對應的 coefficient 拆成兩半表示
+
+$$
+\begin{aligned}
+\mathbf{c}_{k}=\left[\begin{array}{l}
+c_{k x} \\
+c_{k y}
+\end{array}\right]
+\end{aligned}
+$$
+
+### Cubic Interpolating Curves
+
+當有很多點的時候，則是四個點一組，依序拼出 curves。但不同區段接起來的 curves 可能不夠平滑，所以要考慮「當前區段第一個點」和「前一個區段最後一個點」的**微分連續性**。我們可以列出一些限制式，最終就可以根據限制式列出 n \* n 的矩陣方程來解出這個 curve (n 為 control points 的數量)：
+
+- 每個 control points 都在 curve 上
+- 每個 curve 和前個 curve 的一階、二階微分要連續
+- 頭尾端點的 curvature (曲率) 為 0
+
+### Hermite Curves
+
+Hermite curves 是另一種使用 control points 產生出 curve 的方式，特別的是，只需透過頭和尾兩個點的**位置**及**一階微分資訊**來求得
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/hermite_curves.png"
+  caption="Hermite curves"
+/>
+
+- 我們先知道 P 的一階微分長怎樣
+
+$$
+\begin{aligned}
+&\mathbf{p}(u)=c_{0}+c_{1} u+c_{2} u^{2}+c_{3} u^{3}\\
+&\mathbf{p}^{\prime}(u)=\mathbf{c}_{1}+2 u \mathbf{c}_{2}+3 u^{2} \mathbf{c}_{3}
+\end{aligned}
+$$
+
+- 位置
+
+$$
+\begin{aligned}
+&\mathbf{p}_{0}=\mathbf{p}(0)=\mathbf{c}_{0}\\
+&\mathbf{p}_{3}=\mathbf{p}(\mathbf{1})=\mathbf{c}_{0}+\mathbf{c}_{1}+\mathbf{c}_{2}+\mathbf{c}_{3}
+\end{aligned}
+$$
+
+- 一階微分
+
+$$
+\begin{aligned}
+&\mathbf{p}_{0}^{\prime}=\mathbf{p}^{\prime}(0)=\mathbf{c}_{1}\\
+&\mathbf{p}_{3}^{\prime}=\mathbf{p}^{\prime}(\mathbf{1})=\mathbf{c}_{1}+2 \mathbf{c}_{2}+3 \mathbf{c}_{3}
+\end{aligned}
+$$
+
+我們一樣可以得到 $\mathbf{Q}=\mathbf{A c}$，其中的 $\mathbf{A}^{-1}$ 可以記為 $\mathbf{M}_{\mathbf{H}}$ (Hermite Geometry Matrix)
+
+$$
+\begin{aligned}
+\mathbf{Q}=\left[\begin{array}{l}
+\mathbf{p}_{0} \\
+\mathbf{p}_{3} \\
+\mathbf{p}_{0}^{\prime} \\
+\mathbf{p}_{3}^{\prime}
+\end{array}\right]=\left[\begin{array}{llll}
+1 & 0 & 0 & 0 \\
+1 & 1 & 1 & 1 \\
+0 & 1 & 0 & 0 \\
+0 & 1 & 2 & 3
+\end{array}\right] \mathbf{c}, \quad \mathbf{M}_{\mathbf{H}}=\left[\begin{array}{llll}
+1 & 0 & 0 & 0 \\
+1 & 1 & 1 & 1 \\
+0 & 1 & 0 & 0 \\
+0 & 1 & 2 & 3
+\end{array}\right]^{-1}=\left[\begin{array}{cccc}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+-3 & 3 & -2 & -1 \\
+2 & 2 & 1 & 1
+\end{array}\right]
+\end{aligned}
+$$
+
+再來就可以算出 $\mathbf{c}$ 矩陣，進而得到 $\mathbf{p}(u)$
+
+$$
+\begin{aligned}
+&\mathbf{c}=\mathbf{M}_{\mathbf{H}} \mathbf{Q}\\
+&\mathbf{p}(u)=\mathbf{u}^{T} \mathbf{c}=\mathbf{u}^{T} \mathbf{M}_{H} \mathbf{Q}
+\end{aligned}
+$$
+
+### Bezier Curves
+
+當我們只知道四個 control points 而**不知道任何的一階微分資訊**時，就可以使用 bezier curves，他可以利用 p1, p2 的位置，來預估頭尾 p0, p3 的一階微分
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/bezier_curves.png"
+  caption="Bezier curves"
+/>
+
+:::note
+1/3 是兩點的間距
+:::
+
+所以 Bezier 跟 Hermite 只差在一階微分的值，是用**近似**的方法求得
+
+$$
+\begin{aligned}
+&P(0)=P_{0}=c_{0}\\
+&P(1)=P_{3}=c_{0}+c_{1}+c_{2}+c_{3}\\\\
+&P^{\prime}(0)=3\left(P_{1}-P_{0}\right)=c_{1}\\
+&P^{\prime}(1)=3\left(P_{3}-P_{2}\right)=c_{1}+2 c_{2}+3 c_{3}\\\\
+&\mathbf{c}=\mathbf{M}_{\mathrm{B}} \mathbf{P}, \quad \mathbf{M}_{\mathrm{B}}=\left[\begin{array}{cccc}1 & 0 & 0 & 0 \\ -3 & 3 & 0 & 0 \\ 3 & -6 & 3 & 0 \\ -1 & 3 & -3 & 1\end{array}\right]\\
+&\mathbf{p}(u)=\mathbf{u}^{T} \mathbf{c}=\mathbf{u}^{T} \mathbf{M}_{\mathrm{B}} \mathbf{P}
+\end{aligned}
+$$
+
+從以下五個 bezier curves 可以看到，中間點皆是為了預測頭尾微分，而非真正要連接的點
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/bezier_curves_example.png"
+  caption="Bezier curves example"
+/>
+
+### Cubic B-spline Curves
+
+上述所產生的 local curves 在連接時，依然會有一階微分不同導致不平滑的問題，解決方法是透過 B-spline curves
+
+- 讓 curves 不一定要通過頭尾的 control points
+- 但卻可以讓兩個區段在接點處，一階微分的值是相同的
+- 事實上 B-spline 還能滿足接點處的二階微分相同
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/b_spline_curves.png"
+  caption="B-spline curves"
+/>
+
+在推導時，一樣是每四個 control points 來求得一個 curve
+
+<fig
+  src="/img/learning/robotic-navigation-and-exploration/02-motion-planning/b_spline_curves_continuity.png"
+  caption="B-spline curves continuity"
+/>
+
+- $q(u)$ 由 $\mathbf{p}_{i-3}, \mathbf{p}_{i-2}, \mathbf{p}_{i-1}, \mathbf{p}_{i}$ 推導而出
+- $p(u)$ 由 $\mathbf{p}_{i-2}, \mathbf{p}_{i-1}, \mathbf{p}_{i}, \mathbf{p}_{i+1},$ 推導而出
+
+我們希望這兩個區段的 $q(1)$ 和 $p(0)$ 的位置相同、一階微分也相同，所以要滿足以下式子
+
+$$
+\begin{aligned}
+&\mathbf{p}(0)=\mathbf{q}(1)= \color{red}{\frac{1}{6}\left(\mathbf{p}_{i-2}+4 \mathbf{p}_{i-1}+\mathbf{p}_{i}\right)}\\
+&\mathbf{p}^{\prime}(0)=\mathbf{q}^{\prime}(1)= \color{red}{\frac{1}{2}\left(\mathbf{p}_{i}-\mathbf{p}_{i-2}\right)}
+\end{aligned}
+$$
+
+後方求值的設定 (紅色處) 不是固定的，以上只是列出常用的做法
+
+- 位置使用鄰近的三個 points 來預估
+- 一階微分則用鄰近的兩個 points 來預估
+- 要注意鄰近的點需要從兩個區段都有用到的點才能拿來使用
+
+$$
+\begin{aligned}
+\text{Since } &\mathbf{p}(u)=\mathbf{c}_{0}+\mathbf{c}_{1} u+\mathbf{c}_{2} u^{2}+\mathbf{c}_{3} u^{3}=u^{T} \mathbf{c}\\
+&\mathbf{p}(0)=\mathbf{c}_{0}=\frac{1}{6}\left(\mathbf{p}_{i-2}+4 \mathbf{p}_{i-1}+\mathbf{p}_{i}\right) \\
+&\mathbf{p}^{\prime}(0)=\mathbf{c}_{1}=\frac{1}{2}\left(\mathbf{p}_{i}-\mathbf{p}_{i-2}\right) \\
+&\mathbf{p}(1)=\mathbf{c}_{0}+\mathbf{c}_{1}+\mathbf{c}_{2}+\mathbf{c}_{3}=\frac{1}{6}\left(\mathbf{p}_{i-1}+4 \mathbf{p}_{i}+\mathbf{p}_{i+1}\right) \\
+&\mathbf{p}^{\prime}(1)=\mathbf{c}_{1}+2 \mathbf{c}_{2}+3 \mathbf{c}_{3}=\frac{1}{2}\left(\mathbf{p}_{i+1}-\mathbf{p}_{i-1}\right)
+\end{aligned}
+$$
+
+最後我們就可以像其他兩種 curves 一樣推導出 $\mathbf{c}$ 和 $\mathbf{p}(u)$
+
+$$
+\begin{aligned}
+&\mathbf{P}=\mathbf{A c}\\
+&\mathbf{M}_{\mathrm{S}}=\mathbf{A}^{-1}=\frac{1}{6}\left[\begin{array}{cccc}
+1 & 4 & 1 & 0 \\
+-3 & 0 & 3 & 0 \\
+3 & -6 & 3 & 0 \\
+-1 & 3 & -3 & 1
+\end{array}\right] &&\Rightarrow \mathbf{c}=\mathbf{M}_{\mathrm{S}} \mathbf{P}\\
+& \quad&&\Rightarrow \mathbf{p}(u)=u^{T} \mathbf{c} = u^T\mathbf{M}_{\mathrm{S}} \mathbf{P}
+\end{aligned}
+$$
