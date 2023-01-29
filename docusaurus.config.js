@@ -31,6 +31,8 @@ const config = {
     locales: ["zh-TW"],
   },
 
+  themes: ["@docusaurus/theme-live-codeblock"],
+
   presets: [
     [
       "classic",
@@ -95,19 +97,26 @@ const config = {
         },
         items: [
           {
-            // type: "dropdown",
+            type: "dropdown",
             position: "left",
             label: "閱讀前端",
-            type: "doc",
-            docId: "frontend/intro",
-            // items: [
-            //   {
-            //     type: "doc",
-            //     label: "前端工程",
-            //     docId: "reading/frontend/intro",
-            //     sidebarId: "frontend",
-            //   },
-            // ],
+            items: [
+              {
+                type: "doc",
+                label: "HTML / CSS",
+                docId: "frontend/html-css/intro",
+              },
+              {
+                type: "doc",
+                label: "JavaScript / TypeScript",
+                docId: "frontend/js-ts/intro",
+              },
+              {
+                type: "doc",
+                label: "React / Next",
+                docId: "frontend/react-next/intro",
+              },
+            ],
           },
           {
             type: "doc",
@@ -127,12 +136,20 @@ const config = {
         links: [
           {
             title: "閱讀前端",
-            // items: [
-            //   {
-            //     label: "前端工程",
-            //     to: "reading/frontend/intro",
-            //   },
-            // ],
+            items: [
+              {
+                label: "HTML / CSS",
+                to: "frontend/html-css/intro",
+              },
+              {
+                label: "JavaScript / TypeScript",
+                to: "frontend/js-ts/intro",
+              },
+              {
+                label: "React / Next",
+                to: "frontend/react-next/intro",
+              },
+            ],
           },
           {
             title: "筆記和部落格",
@@ -153,6 +170,18 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        magicComments: [
+          {
+            className: "code-block-highlight-line",
+            line: "highlight-next-line",
+            block: { start: "highlight-start", end: "highlight-end" },
+          },
+          {
+            className: "code-block-error-line",
+            line: "error-next-line",
+            block: { start: "error-start", end: "error-end" },
+          },
+        ],
       },
     }),
 };

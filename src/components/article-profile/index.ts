@@ -1,0 +1,1 @@
+export { ArticleProfile } from "./ArticleProfile";

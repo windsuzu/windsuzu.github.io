@@ -1,7 +1,7 @@
 ---
 id: slam-back-end-ii
 title: SLAM Back-end II
-sidebar_label: 4 - SLAM Back-end II
+sidebar_label: 5 - SLAM Back-end II
 hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration]
@@ -9,7 +9,7 @@ draft: false
 last_updated: 2020-05-10
 ---
 
-本文接續 [SLAM Back-end I](slam-back-end-i) 這篇文章，主要介紹了 Filter-based Back-end、Grid-based Back-end 以及 Graph-based Back-end。 第一部分主要介紹 Particle Filter、Sampling 以及 Sequential Importance Sampling (SIS) 和 Sequential Importance Resampling (SIR)，以及由此衍生出的 Fast-SLAM 方法。 第二部分主要介紹 Occupancy Grid Map，以及如何利用 Laser Beam Model 更新地圖狀態以及 Particle weighting，最後介紹了 Grid map 套用 Fast-SLAM 的完整過程。 第三部分主要介紹 Graph Optimization 的方法，以及用 ICP algorithm 找出兩個 scan 之間的對應關係。接著介紹 Map & Pose 以及 Grid-based SLAM。
+本文接續 [SLAM Back-end I](slam-back-end-i)，主要介紹了 Filter-based Back-end、Grid-based Back-end 以及 Graph-based Back-end。 第一部分主要介紹 Particle Filter、Sampling 以及 Sequential Importance Sampling (SIS) 和 Sequential Importance Resampling (SIR)，以及由此衍生出的 Fast-SLAM 方法。 第二部分主要介紹 Occupancy Grid Map，以及如何利用 Laser Beam Model 更新地圖狀態以及 Particle weighting，最後介紹了 Grid map 套用 Fast-SLAM 的完整過程。 第三部分主要介紹 Graph Optimization 的方法，以及用 ICP algorithm 找出兩個 scan 之間的對應關係。接著介紹 Map & Pose 以及 Grid-based SLAM。
 
 ## Filter-based Back-end
 
@@ -34,7 +34,7 @@ Particle filter 會應用 **importance sampling** 來計算大約的隨機分布
 #### Basic Sampling
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/basic_sampling.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/basic_sampling.png"
   caption="Basic Sampling"
 />
 
@@ -45,7 +45,7 @@ Particle filter 會應用 **importance sampling** 來計算大約的隨機分布
 Importance sampling 利用 discrete multinomial 來求近似的 arbitrary distribution，越多的 sampling particles 可以得到越準的近似值
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/importance_sampling.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/importance_sampling.png"
   caption="Importance Sampling"
 />
 
@@ -68,7 +68,7 @@ $$
 $$
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/sis.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/sis.png"
   caption="Sequential Importance Sampling"
 />
 
@@ -91,7 +91,7 @@ $$
 SIS particle filter 中的 particles 會隨著步數增加 weighting 會慢慢退化、不見，或可能變得更大，為了解決該問題，我們新增了 **resampling** 的步驟
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/sir.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/sir.png"
   caption="Sequential Importance Resampling"
 />
 
@@ -108,7 +108,7 @@ Fast-SLAM 將原本要一起進行的定位和建圖拆成各自的工作 (disen
 $p\left(x_{1: t}, m_{t} | z_{1: t}, u_{1: t}\right)=p\left(x_{1: t} | z_{1: t}, u_{1: t}\right) p\left(m_{t} | x_{1: t}, z_{1: t}\right)$
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/fast_slam.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/fast_slam.png"
   caption="Fast-SLAM"
 />
 
@@ -118,7 +118,7 @@ $p\left(x_{1: t}, m_{t} | z_{1: t}, u_{1: t}\right)=p\left(x_{1: t} | z_{1: t}, 
   - 每個 landmark 之間都是互相獨立，所以可以用連乘得到所有 landmarks 的聯合機率分布
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/fast_slam2.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/fast_slam2.png"
   caption="Fast-SLAM"
 />
 
@@ -171,7 +171,7 @@ $$
 因為在 resample 進行複製很花成本，所以利用 balanced binary tree 來表示 particles，就可以用改指標的方式省略複製過程
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/fast_slam3.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/fast_slam3.png"
   caption="Fast-SLAM"
 />
 
@@ -180,7 +180,7 @@ $$
 實際情況下要得知 landmark 不是容易的事，所以有另一種表達方式稱為 **Occupancy Grid Map**。 這種表達方式可以用來 model 任何類型的環境，不需要任何事先定義好的 landmarks。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/occupancy_grid_representation.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/occupancy_grid_representation.png"
   caption="Occupancy Grid Representation"
 />
 
@@ -228,7 +228,7 @@ $$
 當 laser 往障礙物發射後，就可以更新 $l_{f r e e}$ 到所有沒被佔領的地方，而最後 laser 碰到的點就更新 $l_{o c c}$ 上去
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/occupancy_grid_map_algorithm.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/occupancy_grid_map_algorithm.png"
   caption="Occupancy Grid Map Algorithm"
 />
 
@@ -237,7 +237,7 @@ $$
 因為是用 laser 來量測周圍，所以對於障礙物 $z_t^k$ 可能會有幾種量測 model，加起來可以組出 laser beam model
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/laser_beam_model.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/laser_beam_model.png"
   caption="Laser Beam Model"
 />
 
@@ -254,7 +254,7 @@ $$
 將以上四種可能組合成 mixture distribution 就可以得到 laser beam model
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/laser_beam_model_mixture.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/laser_beam_model_mixture.png"
   caption="Laser Beam Model Mixture"
 />
 
@@ -265,7 +265,7 @@ $$
 給定 particle (x, y) 和 laser beam model ($z_t^k$)，就可以在地圖上找到 laser 的終點位子 (紅色點)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/laser_beam_model2.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/laser_beam_model2.png"
   caption="Laser Beam Model 2"
 />
 
@@ -274,7 +274,7 @@ $$
 - 知道紅色點的在綠色分布上的機率，就可以得到這條 laser 上的 likelihood 分布
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/laser_beam_model_algo.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/laser_beam_model_algo.png"
   caption="Laser Beam Model Algorithm"
 />
 
@@ -330,7 +330,7 @@ $\min F(\mathbf{x}, \mathbf{m})=\sum_{k} \mathbf{e}_{\mathbf{u}, k}^{T} \mathbf{
 例如下面 graph 中機器人的偵測存在著誤差，我們就可以將誤差寫做 error function，而我們的目標就是最小化由 error functions 累積形成的 $F(\mathbf{x}, \mathbf{m})$
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization.png"
   caption="Graph Optimization"
 />
 
@@ -349,21 +349,21 @@ $\min F(\mathbf{x}, \mathbf{m})=\sum_{k} \mathbf{e}_{\mathbf{u}, k}^{T} \mathbf{
 #### Basics of Optimization
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/basic_optimization.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/basic_optimization.png"
   caption="Basic Optimization"
 />
 
 當問題中每個函式都是簡單的，就可以直接用微分等於零求解 ($\frac{dF}{dx}$)，若微分變得非常複雜就只好求 local minimum
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/basic_optimization2.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/basic_optimization2.png"
   caption="Basic Optimization"
 />
 
 因為問題通常都是 non-linear 的，所以會呈現下圖這種例子
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/basic_optimization3.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/basic_optimization3.png"
   caption="Basic Optimization"
 />
 
@@ -376,7 +376,7 @@ $F(\mathbf{x}+\mathbf{h}) \approx F(\mathbf{x})+\boldsymbol{J}(\mathbf{x})^{T} \
 後面的 $\boldsymbol{J}(\mathbf{x})$ 和 $\boldsymbol{H}(\mathbf{x})$ 分別代表 F(\mathbf{x}) 的一階和二階導數，求導數是為了變為曲面以便尋找 local minima
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/taylor_expansion_derivative.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/taylor_expansion_derivative.png"
   caption="Taylor Expansion Derivative"
 />
 
@@ -391,7 +391,7 @@ F(x) = \frac{1}{2}\mathbf{x^T Ax - b^T x + c}, \quad \mathbf{A} = \begin{bmatrix
 $$
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/quadratic_functions_shape.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/quadratic_functions_shape.png"
   caption="Quadratic Functions Shape"
 />
 
@@ -411,28 +411,28 @@ $$
 在 2D 平面我們可以觀察兩個 pose 的關係
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_2d.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_2d.png"
   caption="Graph Optimization for 2D"
 />
 
 我們可以將 error 寫成觀測和預測的差
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_2d_error.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_2d_error.png"
   caption="Graph Optimization for 2D Error"
 />
 
 目標就是得到 optimal poses $F = \sum_{i,j} e_{ij}^T\Omega e_{ij}$，可以用一階 taylor 求近似解
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_2d_taylor.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_2d_taylor.png"
   caption="Graph Optimization for 2D Taylor"
 />
 
 可以用 Gauss-Newton 來解 approximation function F 並轉成矩陣形式
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_2d_gauss_newton_matrix.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_2d_gauss_newton_matrix.png"
   caption="Graph Optimization for 2D Gauss-Newton Matrix"
 />
 
@@ -441,7 +441,7 @@ $$
 現實中可能沒辦法取量測值 ($x', y', \theta '$)，做法是使用 scan-to-scan registration
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/scan_to_scan.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/scan_to_scan.png"
   caption="Scan-to-Scan Registration"
 />
 
@@ -454,14 +454,14 @@ $$
 我們可以假設兩組點集合的 mean ($\mu_p, \mu_q$)，改寫上面式子
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/scan_to_scan2.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/scan_to_scan2.png"
   caption="Scan-to-Scan Registration"
 />
 
 計算時找出對應 $\mu_p, \mu_q$ 的相對位置 ($p_i', q_i'$) 之後，可以將最佳化拆成兩個階段，先求 rotation ($R$) 再求 translation ($t$)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/scan_to_scan3.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/scan_to_scan3.png"
   caption="Scan-to-Scan Registration"
 />
 
@@ -472,7 +472,7 @@ $$
 因為可能不知道 p 和 q 之間絕對的對應關係，所以要用 ICP algorithm，ICP 也像一種最佳化，不斷初始化，並觀察是否最好，不是則更新。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/scan_to_scan_icp.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/scan_to_scan_icp.png"
   caption="Scan-to-Scan Registration ICP"
 />
 
@@ -481,7 +481,7 @@ $$
 上面只考慮了 pose 的部分，現在多考慮 landmarks，變成 bipartite 圖
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_pose_map.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_pose_map.png"
   caption="Graph Optimization for Map and Pose"
 />
 
@@ -492,7 +492,7 @@ $$
 若是 landmarks 改用 grid map 形式的話，有兩種做法分別是 Karto-SLAM (開源) 和 Cartographer (Google)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/graph_optimization_map_grid.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/graph_optimization_map_grid.png"
   caption="Graph Optimization for Grid-based SLAM"
 />
 
@@ -501,6 +501,6 @@ $$
 假設 robot pose 為 $\xi = (p_x, p_y, \psi)$ 而 landmarks 為激光打到的 $(s_x, s_y)$ (要轉成 world coordinate)。我們要最大化 grid 是 1 (被佔) 的機率，等於最小化 grid 是 0 (沒有被佔) 的機率
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/04-slam-back-end-ii/scan_to_map.png"
+  src="/img/learning/robotic-navigation-and-exploration/05-slam-back-end-ii/scan_to_map.png"
   caption="Scan-to-Map Matching"
 />

@@ -1,0 +1,115 @@
+---
+id: css-variables
+title: CSS Variables
+sidebar_label: CSS Variables
+hide_title: true
+hide_table_of_contents: false
+tags: [tag1, tag2]
+draft: false
+last_updated: 2022-08-16
+---
+
+<profile
+  title="深入理解 CSS 變數 (CSS Variables)"
+  url="https://www.oxxostudio.tw/articles/202011/css-variables.html"
+  author="oxxo"
+  level="beginner"
+  category={["html/css"]}
+/>
+
+本文介紹了使用 CSS 變數來建立可被重複使用的屬性，可以在 :root 中定義全域變數，也可以在任何 Selector 中定義局部變數。此外，我們近了使用 Media Query 來動態修改變數的值，以及如何在 JavaScript 和 React 中使用變數。
+
+## Variable in CSS (`--` and `var`)
+
+我們可以使用<highlight>雙破折號（例如：`--any-variable`）來定義一個 CSS 變數，然後用 `var()` 來使用它：例如：`var(--any-variable)`。</highlight> 我們在使用 `var()` 時，可以在第二個參數中指定一個預設值，例如：`var(--any-variable, 0)`。
+
+在下面的示範我們使用 `h1-color` 這個變數來定義 `h1` 的顏色，如果沒有定義 `h1-color`，則使用預設值 `#000`。
+
+```css
+:root {
+  --h1-color: #0747ab;
+}
+
+h1 {
+  color: var(--h1-color, #000);
+}
+```
+
+## Global and Local Variables
+
+如果我們想要在整個專案中使用同一個變數，可以在 `:root` Selector 定義變數，這樣所有的元素都可以使用這個變數。反之，我們也可以在任何 Selector 中直接定義變數。
+
+```css
+:root {
+  // highlight-next-line
+  --h1-color: #0747ab; /* Global */
+}
+
+h1 {
+  color: var(--h1-color, #000);
+
+  // highlight-next-line
+  --bg-color: #f0f0f0; /* Local */
+  background-color: var(--bg-color);
+}
+```
+
+但要注意，如果重複定義變數，則會以最接近元素的 Selector 為主。
+
+```css
+:root {
+  --h: #f00;
+}
+
+h1 {
+  // highlight-next-line
+  --h: #00c; /* this will be used */
+  color: var(--h);
+}
+```
+
+## Media Query
+
+我們可以在 Media Query 中動態修改變數的值，例如：在螢幕寬度小於 768px 時，將文字大小縮小。
+
+```css
+:root {
+  --h1-size: 30px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --h1-size: 20px;
+  }
+}
+```
+
+## Variable in JavaScript
+
+我們可以使用 `document.documentElement.style.setProperty()` 來修改在 `:root` 的變數。或是使用 `querySelector()` 來選擇元素，然後使用 `style.setProperty()` 來修改變數。
+
+```js
+const root = document.documentElement;
+root.style.setProperty("--h1", "#f90");
+
+const h2 = document.querySelector("h2");
+h2.style.setProperty("--h2", "#ccc");
+```
+
+## Variable in React
+
+在 React 中，我們可以使用 `style` 屬性來設定變數，例如：`style={{ "--h1-color": "#0747ab" }}`。 使用變數時，我們可以使用 `var()` 來取得變數的值，例如：`color: var(--h1-color, #000)`。
+
+```jsx live noInline
+const Demo = () => {
+  return (
+    <div>
+      <h1 style={{ "--h1-color": "#0747ab", color: "var(--h1-color, #000)" }}>
+        Hello World
+      </h1>
+    </div>
+  );
+};
+
+render(<Demo />);
+```

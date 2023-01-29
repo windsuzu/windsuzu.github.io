@@ -28,3 +28,19 @@
   --ifm-color-primary-lightest: #ffffff;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+.code-block-error-line {
+  background-color: #ff000020;
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+  border-left: 3px solid #ff000080;
+}
+
+.code-block-highlight-line {
+  background-color: #0747ab20;
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+  border-left: 3px solid #0747ab80;
+}

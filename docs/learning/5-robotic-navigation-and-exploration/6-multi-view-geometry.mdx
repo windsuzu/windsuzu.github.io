@@ -1,7 +1,7 @@
 ---
 id: multi-view-geometry
 title: Multi-view Geometry
-sidebar_label: 5 - Multi-view Geometry
+sidebar_label: 6 - Multi-view Geometry
 hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration]
@@ -18,14 +18,14 @@ SLAM 在控制中使用了許多 SfM 相關技術，包括提取特徵點、求�
 圖學的 SfM 和 SLAM 十分相似，只是 SLAM 是 realtime 版本的 SfM。SfM 透過多個圖像來復原 camera motion 和 scene structure。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm.png"
   caption="SfM"
 />
 
 而 SfM 流程可以大致列為
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_process.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_process.png"
   caption="SfM Process"
 />
 
@@ -39,14 +39,14 @@ SLAM 在控制中使用了許多 SfM 相關技術，包括提取特徵點、求�
 以下介紹 SIFT 如何萃取 feature points
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/popular_feature_extractors.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/popular_feature_extractors.png"
   caption="Popular Feature Extractors"
 />
 
 SIFT idea 是將圖像的內容轉換成 local feature coordinates，這些座標不受到 translation, rotation, scale 或其他 imaging parameters 的影響而改變。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sift_features.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sift_features.png"
   caption="SIFT Features"
 />
 
@@ -67,7 +67,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 3. check 是否為平坦區域或 edge 並 reject
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/keypoint_localization.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/keypoint_localization.png"
   caption="Keypoint Localization"
 />
 
@@ -84,7 +84,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 為了更了解 RANSAC 做法要先講到 camera calibration。 Camera calibration 就是求出 intrinsics 和 extrinsics 所有參數，而 world coordinate (x, y, z) 投影到 camera coordinate (u, v) 可以寫成公式：
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/camera_calibration.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/camera_calibration.png"
   caption="Camera Calibration"
 />
 
@@ -96,21 +96,21 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 我們可以利用 image coordinate 和 world coordinate 的對應，來找出沒有做任何 rotation, translation 的 intrinsic, extrinsic matrix。其中的 extrinsic 等於 rotation (3-d identity matrix) 加上 translation。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pinhole_camera_projection_model.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pinhole_camera_projection_model.png"
   caption="Pinhole Camera Projection Model"
 />
 
 為了解決 offset ，我們要加入 $x_0, y_0$ 做為 principle point 和原點的 offset
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pinhole_camera_projection_model_offset.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pinhole_camera_projection_model_offset.png"
   caption="Pinhole Camera Projection Model with Offset"
 />
 
 為了解決 distortion，我們要加入 a, s 來進行校正
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pinhole_camera_projection_model_distortion.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pinhole_camera_projection_model_distortion.png"
   caption="Pinhole Camera Projection Model with Distortion"
 />
 
@@ -119,49 +119,49 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 一組 x, y, z 可以和 u 或 v 分別產生兩個對應的方程式，所以假設 extrinsic 有 8 個要解，只需要 4 組對應點。如果原本需要六組 point pair 才能解出 C = A|AT，現在只需要三組就能解出。這種解法稱為 Perspective-n-Point (PnP)。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pnp.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pnp.png"
   caption="PnP"
 />
 
 傳統是利用 AR marker 來解
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pnp_ar.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pnp_ar.png"
   caption="PnP with AR Marker"
 />
 
 但現實中沒有 AR marker，也不知道 x, y, z 是如何對應 u, v 的
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pnp_problem.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pnp_problem.png"
   caption="PnP Problem"
 />
 
 我們假設有一連串 frame ($sx_1, sx_2, \cdots$)，寫成 KMP = intrinsic _ extrinsic _ 3d coordinate
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pnp_icp.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pnp_icp.png"
   caption="PnP with ICP"
 />
 
 可以看到這個做法就像是 bundle adjustment，其中 intrinsics K 是給定的，要求的是 extrinsics M。其中 s (scale) 要猜測，除非用 marker 有固定比例尺。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/pnp_bundle_adjustment.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/pnp_bundle_adjustment.png"
   caption="PnP with Bundle Adjustment"
 />
 
 ### Unknown Structure Initialization
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/epipolar_plane.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/epipolar_plane.png"
   caption="Epipolar Plane"
 />
 
 兩個 camera 中心對到點 P，會產生 ($C_0, C_1, P$) 這個三角形平面 (epipolar plane)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/unknown_structure_init.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/unknown_structure_init.png"
   caption="Unknown Structure Initialization"
 />
 
@@ -171,7 +171,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 我們就可以列出多組已知 $p0, p1$ 來求 E，用多組對應來解 E，可以寫成 Ax = 0 來求解。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/unkown_structure_init_solve.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/unkown_structure_init_solve.png"
   caption="Unknown Structure Initialization Solve"
 />
 
@@ -182,14 +182,14 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 得到 E 就可以用 SVD 來拆解回 t 跟 R
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/essential_matrix_decomposition.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/essential_matrix_decomposition.png"
   caption="Essential Matrix Decomposition"
 />
 
 因為矩陣拆解可能有正負影響得到多種結果，意思是 p 點到底坐落在 A, B 相機的前方還是後方 (所以有四種可能)，所以必須要都在 A, B 前方的那一個解才行
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/essential_matrix_decomposition2.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/essential_matrix_decomposition2.png"
   caption="Essential Matrix Decomposition"
 />
 
@@ -198,7 +198,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 有了 t, R 接著要來猜 p 的 3D structure P
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/triangulation.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/triangulation.png"
   caption="Triangulation"
 />
 
@@ -207,7 +207,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 整個 SfM 用於 SLAM 的流程大致上如下
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam.png"
   caption="SfM SLAM"
 />
 
@@ -216,21 +216,21 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 首先從共同看到的點來求得 Essential Matrix (E)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam1.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam1.png"
   caption="SfM SLAM Process 1"
 />
 
 再來是 extract pose 的步驟，將 E 拆成 R 和 t
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam2.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam2.png"
   caption="SfM SLAM Process 2"
 />
 
 接著是從 R 和 t 來復原 P 的 3D structure (紅色點)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam3.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam3.png"
   caption="SfM SLAM Process 3"
 />
 
@@ -239,19 +239,19 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 新的 frame 進來，用 feature matching 找出 overlap 的部分
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam4.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam4.png"
   caption="SfM SLAM Process 4"
 />
 
 用 PnP 和 Recover 還原 P (紅色點) 的 3D structure
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam5.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam5.png"
   caption="SfM SLAM Process 5"
 />
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/sfm_slam6.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/sfm_slam6.png"
   caption="SfM SLAM Process 6"
 />
 
@@ -266,7 +266,7 @@ SIFT 應用有 Object recognition (matching)，找兩張圖 matching 地點。Im
 因為要討論 SLAM 中最後一個 loop detection 所以要採用 image matching，一種方法是觀察 SIFT point pair 的 similarity，目標是找出 transformation T 可以解釋 similarity
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/image_matching.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/image_matching.png"
   caption="Image Matching"
 />
 
@@ -275,14 +275,14 @@ Find a transformation T that explains the movement of the matched features
 transformation 可以表示成以下形式，有 6 個參數要解
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/image_matching_affine_transformation.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/image_matching_affine_transformation.png"
   caption="Affine Transformation"
 />
 
 越多組 pair (三組以上) 可以越精準的猜出 transformation，但挑的點不好就會造成錯誤
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/image_matching_fitting.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/image_matching_fitting.png"
   caption="Image Matching Fitting"
 />
 
@@ -293,7 +293,7 @@ transformation 可以表示成以下形式，有 6 個參數要解
 RANdom SAmple Consensus (RANSAC)，在一組數據點中找到一條最適合的線 (省略掉 outliers)
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/ransac.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/ransac.png"
   caption="RANSAC"
 />
 
@@ -304,7 +304,7 @@ RANdom SAmple Consensus (RANSAC)，在一組數據點中找到一條最適合的
 5. Repeat for N rounds, return the best L
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/05-multi-view-geometry/ransac_outliers.png"
+  src="/img/learning/robotic-navigation-and-exploration/06-multi-view-geometry/ransac_outliers.png"
   caption="RANSAC Outliers"
 />
 

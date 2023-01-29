@@ -1,7 +1,7 @@
 ---
 id: lie-group-and-lie-algebra
 title: Lie group and Lie algebra
-sidebar_label: 6 - Lie group and Lie algebra
+sidebar_label: 7 - Lie group and Lie algebra
 hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration]
@@ -16,7 +16,7 @@ last_updated: 2020-05-10
 還記得我們要求 Graph Optimization for 2D Pose 的時候，需要計算 rotation 嗎 ? 這個 Rotation 在 2D 時可以用 $\theta$ 簡單表示就好，但在 3D 時會變得非常複雜，且無法簡單求導數 (原因是 rotation matrix 是無法使用加法運算的)。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/graph_optimization_2d_error.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/graph_optimization_2d_error.png"
   caption="Graph Optimization for 2D Error"
 />
 
@@ -29,7 +29,7 @@ last_updated: 2020-05-10
 - Etc.
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/manifold_space.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/manifold_space.png"
   caption="Manifold Space"
 />
 
@@ -38,7 +38,7 @@ last_updated: 2020-05-10
 用 Axis-angle 舉例，定義旋轉軸 $\omega$ 跟旋轉角度 $\theta = \lVert \vec{\omega}\rVert$。其中 $r'$ 是 $r$ 延著旋轉軸 $\omega$ 進行 $\theta$ 度旋轉後的向量，可拆成平行和垂直於 $\omega$ 的向量 (水平不會改變，可以沿用舊的)。最後可以得到 rodrigues rotation 公式: 在 axis-angle 下用舊的向量來取得新的旋轉向量。
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/axis_angle.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/axis_angle.png"
   caption="Axis-angle"
 />
 
@@ -83,7 +83,7 @@ Group 的基本定義，必須滿足以下四點：
 因為用簡單的三維矩陣來表達 rotation matrix，加法不滿足 group 的定義，無法進行導數，所以必須尋找替代方案
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/interpolating_rotation_matrices.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/interpolating_rotation_matrices.png"
   caption="Interpolating Rotation Matrices"
 />
 
@@ -150,7 +150,7 @@ $$
 ## Lie Group vs. Lie Algebra
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/lie_group_vs_lie_algebra.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/lie_group_vs_lie_algebra.png"
   caption="Lie Group vs. Lie Algebra"
 />
 
@@ -159,7 +159,7 @@ $$
 - 可以用 exponential, logarithmic 來做 mapping
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/lie_group_vs_lie_algebra2.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/lie_group_vs_lie_algebra2.png"
   caption="Lie Group vs. Lie Algebra"
 />
 
@@ -174,7 +174,7 @@ $$
 因為對 lie algebra 求導太複雜，有比較簡單的做法稱為 perturbation model
 
 <fig
-  src="/img/learning/robotic-navigation-and-exploration/06-lie-group-and-lie-algebra/perturbation_model.png"
+  src="/img/learning/robotic-navigation-and-exploration/07-lie-group-and-lie-algebra/perturbation_model.png"
   caption="Perturbation Model"
 />
 
