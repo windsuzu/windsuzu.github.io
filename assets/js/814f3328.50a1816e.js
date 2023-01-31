@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebsite=self.webpackChunkwebsite||[]).push([[2535],{5641:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"\u5982\u4f55\u6d3b\u7528 Copilot\uff0c\u52a0\u5feb\u958b\u767c\u6548\u7387","permalink":"/blog/2023/01/29/work-with-copilot"}]}')}}]);
