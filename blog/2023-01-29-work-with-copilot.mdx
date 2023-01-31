@@ -1,0 +1,162 @@
+---
+title: 如何活用 Copilot，加快開發效率
+authors: jay
+tags: [copilot, github, vscode]
+keywords: [copilot, github, vscode]
+hide_table_of_contents: false
+draft: true
+---
+
+Copilot 是由 GitHub 推出的 AI 輔助工具，由 OpenAI Codex 驅動 (可以說是 ChatGPT 的好麻吉)，可以協助程式開發。我已經使用了接近一年的時間，我認為它可以幫助新手提升開發技巧，而且可以幫助開發者提升效率，例如省下重複性的工作、自動產生測試程式碼等等。甚至可以幫忙編寫文件還有部落格文章，這篇文章就是在 Copilot 的協助下完成的。
+
+在開始前，可以先到 [Copilot](https://github.com/features/copilot/) 了解官方介紹，並按照 [Copilot Docs](https://docs.github.com/zh/copilot) 的指示啟用 60 天免費試用，安裝到 IDE（如 VS Code、JetBrains 等）上。本文將介紹 Copilot 的基本功能，並舉出一些實際的例子來說明為何 Copilot 可以提升開發效率。
+
+## Basics
+
+Copilot 能在任何程式語言中協助你 (本文使用 `.js`)，當你設定好之後，試著在文件中輸入一些東西看看。等待一會，或是跳到下一行，Copilot 就會產生答案。此時，你可以按下 `Tab` 鍵來選擇 Copilot 的建議，或是按下 `Esc` 鍵來取消。如果想要更多的建議，可以按下 `Alt + [` 或是 `Alt + ]` 鍵來切換建議，或是按下 `Ctrl + Space` 鍵來顯示所有的建議。此外，如果你不想跳行，但是 Copilot 也沒自動顯示建議的話，你可以使用 `Alt + \` 鍵來顯示 inline 建議。
+
+<fig
+  src="/img/blog/work-with-copilot/type-something.png"
+  caption="Copilot 會回答你實話"
+/>
+
+如果你已經看過官方介紹，你會發現網站上的例子都比較實際，例如幫你完成寫好註解的函式，或是透過函式名稱猜出並完成函式內容，甚至幫你解題面試。
+
+<fig
+  src="/img/blog/work-with-copilot/complete-function.png"
+  caption="Copilot 幫你作弊"
+/>
+
+所以，我想介紹一些我在實際開發中使用 Copilot 的技巧，這些技巧看起來不像上面解題那樣強大，但它們每個都可以讓你的開發更加愉快。
+
+## Comment to Code
+
+第一個技巧跟解題很像，就是寫好註解，然後讓 Copilot 幫助完成函式內容。這個技巧可以協助新手優化現有的程式碼，也可以協助老手快速完成小型函式。以新手 A 為例，他已經寫好了一個函式，但他知道可以做得更好，但不知道該怎麼改，於是他就在函式上方寫了一些註解，然後請 Copilot 幫他完成函式內容。
+
+<fig
+  src="/img/blog/work-with-copilot/comment-to-improve-code.png"
+  caption="新手透過註解請 Copilot 完成函式"
+/>
+
+而老手 B 常常忘記一些小型函式的寫法，或是根本懶得自己寫，所以他也可以在函式上方寫一些註解，然後請 Copilot 幫他完成函式內容。
+
+<fig
+  src="/img/blog/work-with-copilot/comment-to-lazy-code.png"
+  caption="老屁股透過註解請 Copilot 完成函式"
+/>
+
+<highlight>
+  只要你的註解、函式、變數名稱足夠清楚，Copilot 就能很快幫你完成函式內容
+</highlight>
+。通常使用英文註解可以讓 Copilot 更好的理解你的意思。
+
+## Skip repetitive tasks
+
+第二個技巧是跳過重複的工作，只要你的程式碼有一定的規律，但這些重複的工作又無法透過編寫函式來解決，此時 Copilot 就能夠協助你完成這些重複的工作。甚至 Copilot 還能找出重複的規律，自動幫你調整程式碼。
+
+例如，你可能會有一個字典，裡面有很多 key-value pair，而你需要將這些 key-value pair 變成全域變數。此時，你只需要定義第一個變數，然後連續按下 `Enter` 和 `Tab` 即可。你會發現 Copilot 不僅會新增變數，還會找到變化的規律（將駝峰式改為大寫）。
+
+<fig
+  src="/img/blog/work-with-copilot/skip-repetitive-tasks.png"
+  caption="Copilot 幫你跳過重複的工作"
+/>
+
+## Give me Regex rule
+
+第三個技巧是讓 Copilot 幫你寫正規表達式。假如你有一個文件裡面有很多重複想修改的地方，你想找出所有重複的地方，並透過正規表達式來取代。這時候就可以請 Copilot 幫你寫正規表達式。
+
+<fig
+  src="/img/blog/work-with-copilot/regex-ask.png"
+  caption="詢問 Copilot 正規表達式"
+/>
+
+<fig
+  src="/img/blog/work-with-copilot/regex-apply.png"
+  caption="使用 Copilot 給的正規表達式"
+/>
+
+你甚至還可以反問他這個正規表達式的作用是什麼。
+
+<fig
+  src="/img/blog/work-with-copilot/regex-explain.png"
+  caption="Copilot 解釋正規表達式的作用"
+/>
+
+## Write test
+
+第四個技巧是讓 Copilot 幫助你編寫測試。只要你的測試描述足夠清晰、符合一定的格式，不論你使用任何測試框架（越有名越好），Copilot 都能生成正確的測試程式碼。這個技巧在很多介紹 Copilot 的文章中都會出現，因為很多人都不喜歡編寫測試，所以這個技巧不僅可以讓你少寫測試，還能讓你的測試更加完整 😱。
+
+<fig
+  src="/img/blog/work-with-copilot/write-test.png"
+  caption="Copilot 幫你寫測試"
+/>
+
+## Write git commit messages
+
+第五個技巧是我在 VS Code 上發現的，只要你的 Source Control 的 Commit Message 輸入框還是空白的，你就可以直接按下 Commit 的按鈕進到 Editor 模式，這時候你就可以和 Copilot 一起編輯 Commit Message 了！
+
+<fig
+  src="/img/blog/work-with-copilot/empty-commit.png"
+  caption="在 Source Control 空白的 commit 狀態直接按下 Commit"
+/>
+
+<fig
+  src="/img/blog/work-with-copilot/write-commit-message.png"
+  caption="在 Editor 模式下和 Copilot 一起編輯 Commit Message"
+/>
+
+## Translation
+
+我的第六個技巧是樸實無華的翻譯，當你的專案有國際化（i18n）的需求時，可以請出 Copilot 來協助。只要你的國際化檔案符合一定的格式，Copilot 就能夠幫助你翻譯。
+
+<fig
+  src="/img/blog/work-with-copilot/translate-en.png"
+  caption="先翻譯看看英文"
+/>
+
+<fig
+  src="/img/blog/work-with-copilot/translate-jp.png"
+  caption="再翻譯看看日文"
+/>
+
+## Copilot Labs
+
+除了 Copilot 本身的功能外，Github 也為 VS Code 釋出了一個 Copilot Labs 的 Extension，裡面有一些 Copilot 的實驗性功能，你可以透過[官方的部落格來了解更多](https://githubnext.com/projects/copilot-labs/)。
+
+Copilot Labs 目前提供四個非常強大的功能，第一個是可以幫助你解釋程式碼：只要將你想要解釋的程式碼反白，就可以看到 Copilot 解釋程式碼的結果。
+
+<video width="100%" controls>
+  <source
+    src="https://githubnext.com/assets/projects/copilot-labs/explain.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+第二個是可以將任何語言的程式碼轉換為其他語言，例如將 JavaScript 轉換為 Python。
+
+<video width="100%" controls>
+  <source
+    src="https://githubnext.com/assets/projects/copilot-labs/translate.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+第三個是生成測試程式碼的進階版，你可以直接反白你想要測試的程式碼，然後按下 Copilot Labs 的按鈕，就可以看到 Copilot 生成的測試程式碼。
+
+<fig
+  src="https://githubnext.com/assets/projects/testpilot/testpilot.gif"
+  caption="來源: https://githubnext.com/projects/testpilot"
+/>
+
+最後一個是 BRUSHES，你能夠透過反白程式碼，讓 Copilot 幫你對程式碼進行重構。例如將程式碼變得更簡潔、找出錯誤、列出步驟及註解、添加 Type 等等。
+
+<fig
+  src="/img/blog/work-with-copilot/brushes.png"
+  caption="Copilot Labs 的 BRUSHES 功能"
+/>
+
+## Conclusion
+
+本文介紹了 Copilot 的一些小技巧，<s>我相信這些功能已經足夠讓你在工作時少打字、少想、少寫測試了哈哈。</s>我的使用心得是，Copilot 雖然不能像 ChatGPT 一樣彈性地回覆任何問題，但它的確能夠在開發上幫你省下不少時間。目前 Copilot 也在不斷發展，未來可能還會有更多的功能，讓我們一起期待吧！
