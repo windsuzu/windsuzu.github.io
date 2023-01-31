@@ -1,10 +1,11 @@
 ---
 id: rest-and-spread-syntax
 title: Rest and Spread Syntax
+description: 本文介紹了 JavaScript 中兩種語法：Spread 和 Rest Operator，雖然都是以 … 表現，但它們在程式碼中都有不同的用途。Spread 負責將東西放進一個東西裡面，而 Rest Operator 則是將多個參數轉換成一個陣列。
 sidebar_label: Rest and Spread Syntax
 hide_title: true
 hide_table_of_contents: false
-tags: [tag1, tag2]
+tags: [js/ts, rest/spread syntax]
 draft: false
 last_updated: 2023-01-28
 ---
@@ -16,6 +17,8 @@ last_updated: 2023-01-28
   level="beginner"
   category={["js/ts"]}
 />
+
+本文介紹了 JavaScript 中兩種語法：Spread 和 Rest Operator，雖然都是以 … 表現，但它們在程式碼中都有不同的用途。Spread 負責將東西放進一個東西裡面，而 Rest Operator 則是將多個參數轉換成一個陣列。
 
 Spread 負責將東西 (例如陣列、物件) 放進一個東西裡面 (例如另一個陣列、物件，或是一個函式的參數)。
 
@@ -33,7 +36,7 @@ const sum = (a, b, c, d) => a + b + c + d;
 sum(...newArr); // 1 + 2 + 3 + 4
 ```
 
-Rest 負責將東西 (例如陣列、物件) 拆開成一個個的東西 (例如一個個的陣列元素、物件的屬性)，通常都是在函式中使用。
+Rest 通常都是在函式中使用。負責將一個個分散的東西 (例如多個參數) 組合成一個陣列。
 
 ```js
 // use rest operator as the only argument

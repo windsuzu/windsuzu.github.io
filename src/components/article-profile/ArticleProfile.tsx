@@ -25,7 +25,7 @@ export const ArticleProfile = ({
         flexDirection: "column",
         placeItems: "start",
         textAlign: "start",
-        padding: "1.5rem 0",
+        padding: "0 0 2rem 0",
       }}
     >
       <a

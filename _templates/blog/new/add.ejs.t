@@ -5,13 +5,11 @@ to: blog/<%= new Date().toISOString().split('T')[0] %>-<%=h.inflection.dasherize
 ---
 title: <%=title%>
 description: <%=title%>
-authors: jay
+authors: [jay]
 tags: [tag1, tag2]
 keywords: [keyword1, keyword2]
 hide_table_of_contents: false
-draft: true
+draft: false
 ---
-
-# <%=title%>
 
 This is a new page.

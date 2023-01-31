@@ -5,6 +5,7 @@ to: docs/<%= new Date().toISOString().split('T')[0] %>-<%= h.inflection.dasheriz
 ---
 id: <%= h.inflection.dasherize(h.changeCase.lower(title)) %>
 title: <%= title %>
+description: <%= title %>
 sidebar_label: <%= title %>
 hide_title: true
 hide_table_of_contents: false
@@ -13,6 +14,10 @@ draft: false
 last_updated: <%= new Date().toISOString().split('T')[0] %>
 ---
 
-# <%= title %>
-
-This is a new page.
+<profile
+  title="<%= title %>"
+  url=""
+  author=""
+  level=""
+  category={[""]}
+/>

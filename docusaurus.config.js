@@ -75,7 +75,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: "img/icon/social.png",
+      image: "img/logo/og-image.png",
       metadata: [
         {
           name: "description",
