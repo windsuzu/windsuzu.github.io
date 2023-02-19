@@ -1,0 +1,102 @@
+---
+id: css-transform-is-dead
+title: CSS Transform is Dead
+description: 如果你有在使用 transform 屬性，那麼你可以停止使用了，因為你可以直接使用每個變換樣式了。
+sidebar_label: CSS Transform is Dead
+hide_title: true
+hide_table_of_contents: false
+tags: [css, transform]
+draft: false
+last_updated: 2022-09-04
+---
+
+<profile
+  title="CSS Transform Is Dead! Use This Instead"
+  url="https://www.youtube.com/watch?v=416MT-VmJdI"
+  author="Web Dev Simplified"
+  level="beginner"
+  category={["html/css"]}
+/>
+
+以前，我們需要在 `transform` 屬性中使用變換樣式，例如 `translate`、`scale`、`rotate` 等。但是現在，我們可以直接使用 **每個變換**，而不用把它放在 `transform` 屬性中。
+
+## 用法
+
+例如，以前我們需要這樣寫：
+
+```css
+transform: translate(100px) rotate(20deg) scale(1.2);
+```
+
+現在我們可以這樣寫：
+
+```jsx live noInline
+const Example = styled.div`
+  height: 50px;
+  width: 50px;
+  background: red;
+
+  // now we can use the transform styles directly
+  translate: 100px;
+  rotate: 20deg;
+  scale: 1.2;
+`;
+
+render(<Example />);
+```
+
+## 好處
+
+當你有多個 `class` 使用不同的變換時，他們會互相覆蓋。
+
+```css
+.box.small {
+  transform: scale(0.5);
+}
+
+.box.move {
+  // this will override the scale transform
+  transform: translate(50px);
+}
+```
+
+但是，如果你使用這種新的方法，你可以在每個 `class` 中使用不同的變換，而不會互相覆蓋。
+
+```jsx live noInline
+const TranslateBox = styled.div`
+  height: 50px;
+  width: 50px;
+  background: red;
+  translate: 50px;
+`;
+
+const ScaleTranslateBox = styled(TranslateBox)`
+  scale: 0.5;
+`;
+
+render(<ScaleTranslateBox />);
+```
+
+這些變換樣式也可以在 `@keyframes` 中很方便的使用。
+
+```jsx live noInline
+const KeyframesBox = styled.div`
+  height: 50px;
+  width: 50px;
+  background: red;
+  animation: 1s ease-in-out 0s infinite alternate slide;
+
+  @keyframes slide {
+    from {
+      translate: 0px;
+      rotate: 0deg;
+    }
+    to {
+      translate: 100px;
+      rotate: 180deg;
+    }
+  }
+`;
+
+render(<KeyframesBox />);
+```

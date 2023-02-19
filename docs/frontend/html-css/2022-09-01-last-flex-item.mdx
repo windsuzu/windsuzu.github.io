@@ -1,0 +1,71 @@
+---
+id: last-flex-item
+title: Last Flex Item
+description: 這篇文章介紹了如何使用 Auto Margin 來將最後一個元素放在最後面。
+sidebar_label: Last Flex Item
+hide_title: true
+hide_table_of_contents: false
+tags: [css, flexbox]
+draft: false
+last_updated: 2023-02-11
+---
+
+<profile
+  title="Position last flex item at the end of container"
+  url="https://stackoverflow.com/a/33924704"
+  author="Josh Crozier"
+  level="beginner"
+  category={["html/css"]}
+/>
+
+Auto margin 的特性在 `flexbox` 和在 `block` 中的效果非常相似。在 `justify-content` 和 `align-self` 分配空間之前， `flexbox` 會將所有剩餘的空間先分配給 auto margin 的元素。於是我們可以利用這個特性來將最後一個元素放在最後面。
+
+```jsx live noInline
+const FlexBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #000;
+  min-height: 200px;
+  width: 100px;
+
+  > span:last-child {
+    margin-top: auto;
+  }
+`;
+
+const Demo = () => (
+  <FlexBox>
+    <span>First</span>
+    <span>Second</span>
+    <span>Third</span>
+  </FlexBox>
+);
+
+render(<Demo />);
+```
+
+同樣的道理可以應用在 `flex-direction` 為 `row` 的情況下。
+
+```jsx live noInline
+const FlexBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  border: 1px solid #000;
+  min-height: 100px;
+  width: 200px;
+
+  > span:last-child {
+    margin-left: auto;
+  }
+`;
+
+const Demo = () => (
+  <FlexBox>
+    <span>First</span>
+    <span>Second</span>
+    <span>Third</span>
+  </FlexBox>
+);
+
+render(<Demo />);
+```

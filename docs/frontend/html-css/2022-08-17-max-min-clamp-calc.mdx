@@ -1,0 +1,88 @@
+---
+id: max-min-clamp-calc
+title: Max, Min, Clamp, Calc
+description: 本文介紹 CSS 中的 max、min、clamp 和 calc 這四個函式的功能和用法，還有它們在 CSS 中的運用。
+sidebar_label: Max, Min, Clamp, Calc
+hide_title: true
+hide_table_of_contents: false
+tags: [css]
+draft: false
+last_updated: 2023-02-11
+---
+
+<profile
+  title="深入理解 CSS 的 max、min、clamp、calc"
+  url="https://www.oxxostudio.tw/articles/202011/css-max-min-clamp-calc.html"
+  author="oxxo"
+  level="beginner"
+  category={["html/css"]}
+/>
+
+首先，我們從 `max()` 這個函式開始，它可以在一個給定的數值中，取得最大的值，例如，`max(10px, 20px)` 就會取得 `20px` 的值。`min()` 可以取得一個給定的數值中最小的值，例如，`min(10px, 20px)` 就會取得 `10px` 的值。`clamp()` 則是可以將中間值控制在左右兩邊的值之間，例如，`clamp(10px, 80vw, 30px)` 就會讓 `80vw` 的值限制在 `10px` 和 `30px` 之間。最後，`calc()` 函式則是可以在一個給定的範圍中，進行一些運算，例如，`calc(10px + 20px)` 就會得到 `30px` 的值。由於這四個函式都可以搭配其他的 CSS 屬性一起使用，因此可以非常有效的處理一些複雜的計算以及屬性的設定。
+
+## max()
+
+我們可以使用 `max()` 來設定想要的長度，並且達成 `min-width`。只要一行程式碼就可以完成！例如：
+
+```jsx live noInline
+const Demo = () => (
+  <div
+    // 5vw 但不能小於 200px
+    style={{ width: "max(5vw, 200px)", background: "black", height: 20 }}
+  />
+);
+
+render(<Demo />);
+```
+
+## min()
+
+相反的，我們也可以使用 `min()` 來設定想要的長度，並且符合 `max-width` 的效果。只要一行程式碼就可以完成！例如：
+
+```jsx live noInline
+const Demo = () => (
+  <div
+    // 80vw 但不能大於 200px
+    style={{ width: "min(80vw, 200px)", background: "black", height: 20 }}
+  />
+);
+
+render(<Demo />);
+```
+
+## clamp()
+
+`clamp()` 可以用來設定一個值在兩個值之間。例如：
+
+```jsx live noInline
+const Demo = () => (
+  <div
+    // 100% 但是必須在 200 到 300px 之間
+    style={{
+      width: "clamp(200px, 100%, 300px)",
+      background: "black",
+      height: 20,
+    }}
+  />
+);
+
+render(<Demo />);
+```
+
+## calc()
+
+`calc()` 可以用來計算 CSS 值，並且可以和 `clamp()`、`min()`、`max()` 一起使用。例如在下面的例子，我們首先定義寬度必須為 `80vw` 且不能大於 `200px`。然後我們使用 `calc()` 來計算減去 50px 的值。所以 `div` 的寬度會是 80vw 不能大於 200px，並且減去 50px。
+
+```jsx live noInline
+const Demo = () => (
+  <div
+    style={{
+      width: "calc(min(200px, 80vw) - 50px)",
+      background: "black",
+      height: 20,
+    }}
+  />
+);
+
+render(<Demo />);
+```

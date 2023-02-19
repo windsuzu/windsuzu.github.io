@@ -41,11 +41,24 @@ export const ArticleProfile = ({
           fontWeight: 600,
           margin: 0,
           color: "gray",
-          fontSize: "1.5rem",
           fontFamily: "monospace",
         }}
       >
-        {author}
+        <span
+          style={{
+            fontSize: "1rem",
+          }}
+        >
+          from
+        </span>
+        {"  "}
+        <span
+          style={{
+            fontSize: "1.5rem",
+          }}
+        >
+          {author}
+        </span>
       </p>
       <div
         style={{

@@ -1,0 +1,100 @@
+---
+id: the-orton-effect
+title: The Orton Effect
+description: 這篇文章介紹了 Orton Effect，一種攝影技術，並且使用 CSS 和 React 實現了這種效果。
+sidebar_label: The Orton Effect
+hide_title: true
+hide_table_of_contents: false
+tags: [css, react]
+draft: false
+last_updated: 2022-09-24
+---
+
+<profile
+  title="The Orton Effect - dreamy photo effect in CSS and React"
+  url="https://mikebifulco.com/posts/orton-effect-css-react?utm_source=pocket_mylist"
+  author="Mike Bifulco"
+  level="intermediate"
+  category={["html/css", "react/next"]}
+/>
+
+Orton Effect 是一種攝影技術，對同一場景拍攝兩張照片，一張長曝光，一張短曝光，然後將它們合併，創造出一種朦朧的、玻璃般的效果。
+
+<div style={{ display: "flex", justifyContent: "space-between" }}>
+  <fig
+    src="/img/reading/html-css/2022-09-24-the-orton-effect/no-effect.png"
+    caption="原圖"
+  />
+  <fig
+    src="/img/reading/html-css/2022-09-24-the-orton-effect/orton-effect.png"
+    caption="Orton Effect"
+  />
+</div>
+
+## 在 CSS 中實現
+
+在 HTML 中，我們將兩張相同的圖片嵌套在 `<figure>` 中，並將第二張圖片的 `aria-hidden` 設為 `true` 來加強 accessibility。接著，我們將第一張圖片的 `position` 設為 `absolute` 覆蓋第二張圖片。其他 3 行 CSS 通過使用 `mix-blend-mode`、`filter` 和 `opacity` 創建 **Orton effect**。
+
+```jsx live noInline
+const OrtonFigure = styled.figure`
+  > img:first-child {
+    position: absolute;
+    mix-blend-mode: lighten;
+    filter: blur(50px);
+    opacity: 50%;
+  }
+`;
+
+render(
+  <OrtonFigure>
+    <img
+      src="/img/reading/html-css/2022-09-24-the-orton-effect/no-effect.png"
+      alt="Orton Effect"
+    />
+    <img
+      src="/img/reading/html-css/2022-09-24-the-orton-effect/no-effect.png"
+      alt="Orton Effect"
+      aria-hidden="true"
+    />
+  </OrtonFigure>
+);
+```
+
+## 製作成一個 React Component
+
+我們可以利用上面的 CSS 來製作一個 React Component，並將 `blurRadius` 和 `opacity` 作為 props 傳入。以下的示範還有一些地方可以加強：
+
+1. 確保 `opacity` 介於 0 和 100 之間
+2. 確保 `blurRadius` 是正整數
+3. 如果沒有提供這些 props，則提供一些合理的預設值
+
+:::tip
+作者建議使用 25% 到 50% 的不透明度，而模糊半徑則取決於圖片本身。
+:::
+
+```jsx live noInline
+const OrtonEffectImage = ({ alt, blurRadius, opacity, src }) => (
+  <figure style={{ position: "relative" }}>
+    <img
+      src={src}
+      alt={alt}
+      style={{
+        mixBlendMode: "lighten",
+        filter: `blur(${blurRadius}px)`,
+        opacity: `${opacity}%`,
+        position: "absolute",
+      }}
+    />
+    <img src={src} aria-hidden={true} />
+  </figure>
+);
+
+render(
+  <OrtonEffectImage
+    src="/img/reading/html-css/2022-09-24-the-orton-effect/example.jpg"
+    alt="Orton Effect Example"
+    blurRadius={50}
+    opacity={60}
+  />
+);
+```

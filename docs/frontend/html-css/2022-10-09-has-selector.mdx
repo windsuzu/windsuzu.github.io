@@ -1,0 +1,111 @@
+---
+id: has-selector
+title: :has Selector
+description: 本文介紹了 CSS :has 選擇器，這是一個可以透過子元素來改變父元素的樣式的選擇器。
+sidebar_label: The :has Selector
+hide_title: true
+hide_table_of_contents: false
+tags: [css, selector]
+draft: false
+last_updated: 2022-10-09
+---
+
+<profile
+  title="CSS :has A Parent Selector And It Is Better Than I Ever Could Have Hoped For"
+  url="https://blog.webdevsimplified.com/2022-09/css-has-selector/"
+  author="Web Dev Simplified"
+  level="beginner"
+  category={["html/css"]}
+/>
+
+如果你想要<highlight>透過子元素來改變父元素的樣式</highlight>，那麼你可以使用最近 CSS 釋出的 `:has` 選擇器。
+
+:::info
+`:has` is a parent selector just released by CSS at the end of August 2022 in Chrome. It can be used to select parent elements that contain some specific child element. It can also be used with complex selectors, multiple selectors, or as a way to select some other elements.
+:::
+
+## Usage
+
+以下介紹四種不同的使用方式，分別是基本、複雜、複數條件、以及使用父元素來選擇子元素。
+
+### Basic
+
+For example, we want to add some `margin-bottom` to elements with the class of `heading`. But we only want to select those `heading` that contain any sub-elements with the class of `subtitle`.
+
+舉例來說，我們想對 `heading` 加上顏色，但是我們只想要選擇那些有 `subtitle` 的 `heading`。我們可以這樣寫：
+
+```css
+.heading:has(.subtitle) {
+  margin-bottom: 1rem;
+}
+```
+
+### Complex
+
+我們也可以加強搜尋條件，例如選擇包含**直接子元素 (>)** 為 `subtitle` 並且擁有 `strong` 元素，而且 `strong` 元素的 `id` 還為 `accent` 的`heading`：
+
+```css
+.heading:has(> .subtitle strong#accent) {
+  margin-bottom: 1rem;
+}
+```
+
+### Multiple Conditions
+
+我們也可以使用逗號來加入多個 (||) 條件，例如選擇包含 `subtitle` 或是 `p` 的 `heading`。或是利用多個 `:has` 來達成 (&&) 的效果，例如選擇包含 `subtitle` 並且包含 `p` 的 `heading`。
+
+```css
+/* || */
+.heading:has(.subtitle, p)
+/* && */
+.heading:has(.subtitle):has(p)
+```
+
+### Use parent to select child
+
+我們也可以使用父元素來選擇子元素，例如選擇包含 `subtitle` 的 `heading`，並且對其中的 `p` 加上 `color: red`。
+
+```css
+.heading:has(.subtitle) p {
+  color: red;
+}
+```
+
+## Example
+
+實際利用 Code Editor 來看看 `:has` 選擇器的效果吧！
+
+```jsx live noInline
+const Heading = styled.h3`
+  :has(.subtitle) {
+    color: red;
+  }
+  :has(> .subtitle strong#accent) {
+    color: blue;
+  }
+  :has(.subtitle):has(p) {
+    color: green;
+  }
+  :has(.subtitle) p {
+    color: orange;
+  }
+`;
+
+render(
+  <>
+    <Heading>
+      Heading 1<span className="subtitle">Yes</span>
+    </Heading>
+    <Heading>
+      Heading 2
+      <span className="subtitle">
+        <strong id="accent">Wow</strong>
+      </span>
+    </Heading>
+    <Heading>
+      Heading 3<span className="subtitle">Hey</span>
+      <p>Random text</p>
+    </Heading>
+  </>
+);
+```

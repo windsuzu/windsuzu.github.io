@@ -1,0 +1,237 @@
+---
+id: webpack-beginner
+title: Webpack Beginner
+description: Webpack Beginner
+sidebar_label: Webpack Beginner
+hide_title: true
+hide_table_of_contents: false
+tags: [webpack]
+draft: false
+last_updated: 2022-10-09
+---
+
+<profile
+  title="webpack 新手教學之淺談模組化與 snowpack"
+  url="https://blog.techbridge.cc/2020/01/22/webpack-%E6%96%B0%E6%89%8B%E6%95%99%E5%AD%B8%E4%B9%8B%E6%B7%BA%E8%AB%87%E6%A8%A1%E7%B5%84%E5%8C%96%E8%88%87-snowpack/"
+  author="TechBridge 技術共筆部落格 huli"
+  level="beginner"
+  category={["other"]}
+/>
+
+## Module and CommonJS
+
+在 ES6 (2015) 之前，JS 的模組化沒有任何標準或規則可以遵循，任何人都可以創建自己的 `import/export` 語法。例如在以下的例子中，我們使用 `module.exports` 與 `require` 來實現模組化。這種方式就是 **CommonJS** 的模組化規範，是 在 Node.js 的模組化規範。
+
+```js
+// utils.js
+function sum(a, b) {
+  return a + b;
+}
+module.exports = {
+  sum,
+  name: "utils",
+};
+
+// main.js
+var obj = require("./utils");
+console.log(obj.sum(1, 2)); // 3
+console.log(obj.name); // utils
+```
+
+## Browser Module and Browserify
+
+我們在瀏覽器中執行的 JavaScript 沒有使用 **CommonJS** 或任何其他 `import/export` 語法的能力。於是 **Browserify** 在 2011 年被發明出來，並說："_Browserify lets you require('modules') in the browser by bundling up all of your dependencies._"。
+
+Browserify 簡單地將應用程式的進入點（`main.js`）和所有的 **模組（import/export）** 自動打包成一個可以在瀏覽器中使用的 JavaScript 檔案（`bundle.js`），讓你可以在瀏覽器中自由地使用 **CommonJS**。
+
+```shell
+npx browserify main.js -o bundle.js
+```
+
+## ES6 ESM (import and export)
+
+時間來到了 2015 年，ES6 為 JavaScript 建立了一個標準的模組化 `import/export` 語法（ESM），但它仍然無法直接與瀏覽器或 Node.js 相容。
+
+```js
+// utils.js
+function sum(a, b) {
+  return a + b;
+}
+export default {
+  sum,
+  name: "utils",
+};
+
+// main.js
+import obj from "./utils";
+console.log(obj.sum(1, 2)); // 3
+console.log(obj.name); // utils
+```
+
+### ES6 ESM in Node.js
+
+如果你想要在 Node.js 中使用 ES6 的 `import/export` 語法，你有兩種選擇：
+
+1. 將你的檔案從 `.js` 改成 `.mjs`
+2. 或者使用 **[babel](https://babeljs.io/repl#?browsers=&build=&builtIns=false&spec=false&loose=false&code_lz=JYWwDg9gTgLgBBARgKzgMyhEcDkA6AegFcZgAbAZxwCgBjCAOwojIFM8yIBzACiWTy0AhmR4BmAAwBKKXUbM2HbnxR4GQkK1lA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=false&presets=es2015%2Creact%2Cstage-2&prettier=false&targets=&version=7.8.3&externalPlugins=)** 將 ES6 語法轉換成 ES5
+
+### ES6 ESM in Browser
+
+如果你想要在瀏覽器中使用 ES6 的 `import/export` 語法，你必須照著以下步驟做：
+
+1. 在 `<script>` 標籤中加入 `type="module"` 屬性
+
+```html
+<head>
+  <script src="./main.js" type="module"></script>
+</head>
+```
+
+2. 在 `import` 的檔案路徑中加入副檔名 `.js`
+
+```js
+// main.js
+import obj from "./utils.js";
+console.log(obj.sum(1, 2)); // 3
+console.log(obj.name); // utils
+```
+
+3. 使用 `http://` 來執行你的應用程式，而不是 `file://`
+
+:::caution
+上面的步驟似乎已經解決了 ESM 的問題，但它仍然有兩個問題：
+
+1. ESM 在舊版的瀏覽器中不被支援，例如 IE
+2. ESM 很難從 npm 安裝並引入套件，例如 `import pad from 'pad-left'` 這樣的語法是不被支援的。你可能需要每次都使用 `import pad from './node_modules/pad-left/index.js` 來引入套件。
+
+:::
+
+## Webpack
+
+因為模組化的機制在瀏覽器中有很多問題（例如與不同瀏覽器和 npm 的相容性），我們需要一個工具來解決它。而這個工具就是 **Webpack**。 **Webpack** 與 **Browserify** 很相似。它不僅允許我們的瀏覽器 JavaScript 代碼輕鬆地利用 **ES6** 的 `import/export` 語法來使用模組，而且還附帶了許多有用的 `loader` 和 `plugin`。 讓我們可以做到像下面這樣的事情：
+
+```js
+// main.js
+import obj from "./utils.js";
+import pad from "pad-left"; // npm install pad-left
+console.log(obj.cal(30));
+console.log(pad("4", 4, 0));
+```
+
+### How to bundle with Webpack
+
+在使用 Webpack 時，我們首先需要建立一個設定檔（`webpack.config.js`）。在設定檔中，我們需要定義一些基本的參數，例如應用程式的進入點（`./main.js`），以及產生的打包檔案的檔名和位置。 Webpack 也有一個 `mode` 參數，可以在 **development** 和 **production** 之間切換。我們可以使用 **development mode** 讓打包的速度在 development 時變快。
+
+```js
+// webpack.config.js
+module.exports = {
+  mode: "development", // or 'production'
+  entry: "./main.js",
+  output: {
+    // __dirname means using the same folder as this config
+    path: __dirname,
+    filename: "webpack_bundle.js",
+  },
+};
+```
+
+接著，我們可以使用 `npx webpack` 來執行 Webpack。 Webpack 會自動讀取 `webpack.config.js` 並執行打包。 我們也可以使用 `npx webpack --config webpack.config.js` 來執行 Webpack。
+
+```shell
+npm init -y
+npm install webpack webpack-cli --save-dev
+npx webpack --config webpack.config.js
+```
+
+最後，我們需要在 `index.html` 中加入打包好的檔案 `webpack_bundle.js` 就可以了。
+
+:::info
+使用 webpack 產生的 bundle 檔案可以不需要把 `type=module` 加在 `<script>` 標籤中。  
+:::
+
+```html
+<head>
+  <script src="./webpack_bundle.js"></script>
+</head>
+```
+
+### The power of webpack (loaders)
+
+Webpack 除了解決模組化的問題之外，還可以讓我們直接在 JavaScript 中引入圖片或 CSS。這個功能與 JavaScript 或 ES6 完全無關，完全是由 webpack 將圖片和 CSS 模組化所達成的。
+
+```js
+import Image from "./assets/banner.png";
+import styles from "style.css";
+```
+
+為了達成這些功能，Webpack 定義了一些 `loader`，不同的 `loader` 處理不同的資源。例如，你可以使用一個 SCSS loader 來載入 SCSS 檔案，Webpack 會幫你將它們編譯成純 CSS。或是你可以使用 ES10 來撰寫你的 JS，Webpack 會使用 `babel-loader` 將它轉換成 ES5。
+
+<fig
+  caption="Webpack 的 loader 可以讓我們直接在 JavaScript 中引入圖片或 CSS。"
+  src="/img/reading/other/2022-10-09-webpack-beginner/webpack.png"
+/>
+
+Webpack 還可以在打包的過程中做到更多有趣的事情，例如：
+
+1. 將 JS 做 **uglify**
+2. 將 CSS 做 **minify**
+3. 為打包好的檔案加上 **hash**
+4. 將不同的檔案打包成不同的頁面，這樣你就不需要一次載入所有的檔案
+5. 在需要時 **動態引入** JS
+
+## Review
+
+在你閱讀完這篇文章之後，你應該可以回答這些問題：
+
+<details>
+  <summary>
+    1. 為什麼很多專案（例如 React）在部署之前都要經過建置（`build`）？
+  </summary>
+  因為瀏覽器無法直接讀取我們的 ESM 和 ES10 代碼，所以我們需要 webpack 在建置過程中幫助我們打包代碼。
+</details>
+
+<details>
+  <summary>
+    2. <code>require/module.exports</code> 與 <code>import/export</code>{" "}
+    有什麼不同？
+  </summary>
+  <code>require/module.exports</code> 是支援 Node.js 的 CommonJS 語法，而 <code>
+    import/export
+  </code> 是 ES6 的語法，由 Node.js 和部分瀏覽器支援。
+</details>
+
+<details>
+  <summary>
+    3. 在瀏覽器中使用 ES6 的 <code>import/export</code> 有什麼限制嗎？
+  </summary>
+  <ol style={{ listStyleType: "decimal" }}>
+    <li>必須在 server 端執行</li>
+    <li>
+      必須在 <code>&lt;script&gt;</code> 標籤中加上 <code>type=module</code>
+    </li>
+    <li>
+      必須在 <code>import</code> 中指定檔案副檔名
+    </li>
+    <li>
+      必須在 <code>import</code> 中指定 npm 套件的絕對路徑
+    </li>
+  </ol>
+</details>
+
+<details>
+  <summary>
+    4. 為什麼我們要使用 <code>webpack</code>？
+  </summary>
+  <ol style={{ listStyleType: "decimal" }}>
+    <li>我們想更容易地引入 ES6 模組（和 npm 套件）</li>
+    <li>我們想更容易地引入圖片和 CSS 檔案</li>
+    <li>我們想統一在一個地方處理 uglify、minify 和其他處理程序</li>
+  </ol>
+</details>
+
+<details>
+  <summary>
+    5. 為什麼 <code>webpack</code> 需要 <code>loader</code>？
+  </summary>
+  Webpack 預設的 loader 只能讀取 JavaScript，但是其他的 loader 可以讀取 CSS、圖片等等。
+</details>

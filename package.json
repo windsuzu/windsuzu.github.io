@@ -16,9 +16,9 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.3.0",
-    "@docusaurus/preset-classic": "^2.3.0",
-    "@docusaurus/theme-live-codeblock": "^2.3.0",
+    "@docusaurus/core": "^2.3.1",
+    "@docusaurus/preset-classic": "^2.3.1",
+    "@docusaurus/theme-live-codeblock": "^2.3.1",
     "@mdx-js/react": "^1.6.22",
     "clsx": "^1.2.1",
     "hast-util-is-element": "1.1.0",
@@ -26,10 +26,11 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "rehype-katex": "5",
-    "remark-math": "3"
+    "remark-math": "3",
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.2.0",
+    "@docusaurus/module-type-aliases": "^2.3.1",
     "@tsconfig/docusaurus": "^1.0.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "eslint": "^8.0.1",

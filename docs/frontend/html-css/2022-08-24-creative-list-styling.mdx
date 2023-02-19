@@ -1,0 +1,168 @@
+---
+id: creative-list-styling
+title: Creative List Styling
+description: 本文討論了 CSS 清單樣式和裝飾，主要涵蓋了 marker、counter(list-item)、before，以及 columns 和 break-inside 的使用方式。
+sidebar_label: Creative List Styling
+hide_title: true
+hide_table_of_contents: false
+tags: [css]
+draft: false
+last_updated: 2022-08-24
+---
+
+<profile
+  title="Creative list styling"
+  url="https://web.dev/creative-list-styling/"
+  author="Michelle Barker"
+  level="intermediate"
+  category={["html/css"]}
+/>
+
+本文討論了 CSS 清單樣式和裝飾，主要涵蓋了 marker、counter(list-item)、before，以及 columns 和 break-inside 的使用方式。
+
+## `::marker` and `counter(list-item)`
+
+我們可以使用 `::marker` (pseudo class) 和 `content` 來改變默認的 list 樣式。另外，`counter(list-item)` 也可以幫助我們顯示當前項目的索引。我們還可以通過在 `li` 中定義 `counter-increment` 來改變索引的增加幅度。
+
+```jsx live noInline
+const CustomList = styled.ul`
+  > li {
+    counter-increment: list-item 2;
+
+    ::marker {
+      --image: "📩 ";
+      content: var(--image) counter(list-item) " ";
+    }
+
+    &:nth-child(2n)::marker {
+      --image: "📨 ";
+    }
+  }
+`;
+
+const List = () => (
+  <CustomList>
+    <li>Lorem ipsum dolor sit amet.</li>
+    <li>Lorem ipsum dolor sit.</li>
+    <li>Lorem ipsum dolor sit amet consectetur.</li>
+    <li>Lorem ipsum dolor sit amet consectetur.</li>
+  </CustomList>
+);
+
+render(<List />);
+```
+
+## `::before`
+
+`::before` 是裝飾 li 的另一種方式，他也可以和 `counter(list-item)` 一起使用。
+
+```jsx live noInline
+const CustomList = styled.ul`
+  > li {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 4px 0;
+    counter-increment: list-item 4;
+
+    ::before {
+      counter-increment: list-item;
+      content: counter(list-item);
+      font-size: 2.5rem;
+      font-weight: 700;
+      width: 1.5em;
+      height: 1.5em;
+      background: black;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+`;
+
+const List = () => (
+  <CustomList>
+    <li>Lorem ipsum dolor sit amet.</li>
+    <li>Lorem ipsum dolor sit.</li>
+    <li>Lorem ipsum dolor sit amet consectetur.</li>
+    <li>Lorem ipsum dolor sit amet consectetur.</li>
+  </CustomList>
+);
+
+render(<List />);
+```
+
+## Multi-column and `break-inside`
+
+我們可以透過設置 `columns` 來確保我們的列表是自動響應的。只有在有足夠的空間時，才會把 items 分成兩列或多列上。我們還可以使用 `column-gap` 在 columns 之間設置一個間隙。為了更多的裝飾，我們也可以**[添加 `column-rule` 改變風格](https://developer.mozilla.org/docs/Web/CSS/column-rule)**。
+
+另外，我們可以使用 `break-inside: avoid` 來確保每個 item 中的東西都保留在同一個 column 而不會被自動分散。
+
+```jsx live noInline
+const CustomList = styled.ol`
+  columns: 10rem;
+  column-gap: 8rem;
+  column-rule: 4px dotted turquoise;
+
+  > li {
+    // Try removing this line to see the difference
+    break-inside: avoid;
+
+    span {
+      display: block;
+
+      &:first-child {
+        font-size: 1.5rem;
+      }
+
+      &:last-child {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: #999;
+      }
+    }
+
+    ::marker {
+      content: counters(list-item, "") ": ";
+      font-weight: 700;
+      font-size: 1.5em;
+      color: turquoise;
+    }
+  }
+`;
+
+const List = () => (
+  <CustomList reversed start="20">
+    <li>
+      <span>Arooj Aftab</span>
+      <span>Vulture Prince</span>
+    </li>
+    <li>
+      <span>Dave</span>
+      <span>We’re All Alone in This Together</span>
+    </li>
+    <li>
+      <span>Nick Cave and Warren Ellis</span>
+      <span>Carnage</span>
+    </li>
+    <li>
+      <span>Turnstile</span>
+      <span>Glow On</span>
+    </li>
+    <li>
+      <span>Tirzah</span>
+      <span>Colourgrade</span>
+    </li>
+    <li>
+      <span>Deafheaven</span>
+      <span>Infinite Granite</span>
+    </li>
+  </CustomList>
+);
+
+render(<List />);
+```

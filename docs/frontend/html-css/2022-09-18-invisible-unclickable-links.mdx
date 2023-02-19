@@ -1,0 +1,101 @@
+---
+id: invisible-unclickable-links
+title: Invisible Unclickable Links
+description: 有些網站都會有一個或多個看不見的連結，也不能點擊他。這是因為這些連結是用來提升 accessibility 讓一些用戶更輕易瀏覽網站所設計的。這些連結可以讓用戶依靠鍵盤直接跳到網站的主要內容，或是跳到網站的導覽列。
+sidebar_label: Invisible Unclickable Links
+hide_title: true
+hide_table_of_contents: false
+tags: [html, css, accessibility]
+draft: false
+last_updated: 2023-02-12
+---
+
+<profile
+  title="Why Does Nearly Every Site Have This “Invisible Unclickable“ Link?"
+  url="https://www.youtube.com/watch?v=VUR0I5mqq7I"
+  author="Web Dev Simplified"
+  level="intermediate"
+  category={["html/css"]}
+/>
+
+有些網站都會有一個或多個看不見的連結，也不能點擊他。這是因為這些連結是用來提升 accessibility 讓一些用戶更輕易瀏覽網站所設計的。這些連結可以讓用戶依靠鍵盤直接跳到網站的主要內容，或是跳到網站的導覽列。
+
+<fig
+  src="/img/reading/html-css/2022-09-18-invisible-unclickable-links/amazon.png"
+  caption="在 Amazon 按下 Tab 鍵時，會自動跳到一個看不見的連結上，讓用戶可以直接跳到網站的主要內容"
+/>
+
+## 製作方式
+
+製作這種連結的方式很簡單，第一步是在網頁的最上方加上一個 `a` 標籤，並且連結到網站的主要內容 (或是導覽列)。
+
+```html
+<a class="skip-link" href="#main-content">Skip to main content</a>
+...
+<main id="main-content"></main>
+```
+
+接著在 CSS 中設定這個 `a` 標籤的樣式，讓它看不見，但是當他被 focus 時，可以看見。
+
+```css
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background-color: #333;
+  color: white;
+  padding: 0.5rem;
+  translate: 0 -100%;
+}
+
+.skip-link:focus {
+  translate: 0;
+}
+```
+
+### 補充
+
+你可以在實作時透過添加 `:not(.skip-link):focus` 樣式，來顯示你目前 focus 的元素。
+
+```css
+:not(.skip-link):focus {
+  outline: 5px solid red;
+}
+```
+
+```jsx live noInline
+render(
+  <>
+    <a className="skip-link" href="#main-content">
+      Skip to main content
+    </a>
+    <main id="main-content">
+      試著點擊灰色的「結果」列，讓 focus 從 Code Editor 開始，然後按下 Tab 鍵
+    </main>
+    <style jsx>{`
+      .skip-link {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        text-align: center;
+        background-color: #333;
+        color: white;
+        padding: 0.5rem;
+        translate: 0 -100%;
+      }
+
+      .skip-link:focus {
+        translate: 0;
+      }
+
+      :not(.skip-link):focus {
+        outline: 5px solid red;
+      }
+    `}</style>
+  </>
+);
+```

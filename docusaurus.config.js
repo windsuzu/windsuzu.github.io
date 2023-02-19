@@ -116,6 +116,11 @@ const config = {
                 label: "React / Next",
                 docId: "frontend/react-next/intro",
               },
+              {
+                type: "doc",
+                label: "Other",
+                docId: "frontend/other/intro",
+              },
             ],
           },
           {
@@ -148,6 +153,10 @@ const config = {
               {
                 label: "React / Next",
                 to: "frontend/react-next/intro",
+              },
+              {
+                label: "Other",
+                to: "frontend/other/intro",
               },
             ],
           },

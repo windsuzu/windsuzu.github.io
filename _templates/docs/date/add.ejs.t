@@ -15,7 +15,7 @@ last_updated: <%= new Date().toISOString().split('T')[0] %>
 ---
 
 <profile
-  title="<%= title %>"
+  title=""
   url=""
   author=""
   level=""
