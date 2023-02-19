@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkwebsite=self.webpackChunkwebsite||[]).push([[4128],{5786:e=>{e.exports=JSON.parse('{"label":"webpack","permalink":"/tags/webpack","allTagsPath":"/tags","count":1,"items":[{"id":"frontend/other/webpack-beginner","title":"Webpack Beginner","description":"Webpack Beginner","permalink":"/frontend/other/webpack-beginner"}]}')}}]);
