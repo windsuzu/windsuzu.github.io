@@ -1,0 +1,120 @@
+---
+id: keeping-state-local
+title: Keeping State Local
+description: 在 React 的狀態管理中，有一個黃金規則，就是盡可能地將狀態保持在元件本身。這意味著你應該只在需要它的元件中宣告狀態，而不是每次都將狀態宣告在最上層的元件中。在最上層宣告狀態，可能會導致不必要的複雜性，使你的程式碼難以維護。
+sidebar_label: Keeping State Local
+hide_title: true
+hide_table_of_contents: false
+tags: [react, state-management]
+draft: false
+last_updated: 2022-09-28
+---
+
+<profile
+  title="Are You Making This React State Mistake?"
+  url="https://www.youtube.com/watch?v=NZqMVUEiDIw"
+  author="Web Dev Simplified"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+在 React 的狀態管理中，有一個黃金規則，就是盡可能地將狀態保持在元件本身。這意味著你應該只在需要它的元件中宣告狀態，而不是每次都將狀態宣告在最上層的元件中。在最上層宣告狀態，可能會導致不必要的複雜性，使你的程式碼難以維護。
+
+## Keeping State Local
+
+考慮下面這個計數器的範例，我們在最上層的元件中宣告了 `count` 和 `setCount` 的狀態，然後將它們傳遞給 `Counter` 元件。但是，這個狀態只在 `Counter` 元件中使用，或許我們可以將狀態移動到 `Counter` 元件中。
+
+```jsx
+const App = () => {
+  const [count, setCount] = useState(0);
+  return <Counter count={count} setCount={setCount} />;
+};
+```
+
+以下是重構後的程式碼，我們將 `count` 和 `setCount` 的狀態宣告移動到 `Counter` 元件中，這樣就可以簡化程式碼，並使其更容易維護。
+
+- 當你有其他元件需要使用 `Counter` 時，你不需要再傳遞一次 `count` 和 `setCount`。
+- 當你需要修改 `Counter` 的狀態時，你不會影響到 App 中的其他元件。
+
+```jsx live noInline
+const App = () => {
+  return <Counter />;
+};
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <button onClick={() => setCount((prev) => prev - 1)}>-</button>
+      <span>{count}</span>
+      <button onClick={() => setCount((prev) => prev + 1)}>+</button>
+    </div>
+  );
+};
+
+render(<App />);
+```
+
+## Keeping Form Data Local
+
+這個黃金規則不僅限於計數器，它也適用於表單。考慮以下範例。我們有一個 `LoginForm` 元件，但在 `App` 我們只好奇 `LoginForm` 最終提交的表單數據，而不是 `LoginForm` 的當前狀態 (`formData`)。所以我們可以將 `formData` 的狀態和 `updateFormData` 函式移動到 `LoginForm` 元件中。
+
+```jsx
+const App = () => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+
+  function updateFormData(newData) {
+    setFormData((prev) => ({ ...prev, ...newData }));
+  }
+
+  function onSubmit() {
+    console.log(formData);
+  }
+
+  return (
+    <LoginForm
+      data={formData}
+      updateData={updateFormData}
+      onSubmit={onSubmit}
+    />
+  );
+};
+```
+
+以下是重構後的程式碼，我們將 `formData` 的狀態和 `updateFormData` 函式移動到 `LoginForm` 元件中。由於 `LoginForm` 不需要隨時更新或檢查 `formData` 的狀態，所以我們可以使用 `useRef` 在最後提交時獲取表單數據即可。
+
+```jsx live noInline
+const App = () => {
+  function onSubmit(formData) {
+    console.log(formData);
+  }
+  return <LoginForm onSubmit={onSubmit} />;
+};
+
+const LoginForm = ({ onSubmit }) => {
+  const emailRef = useRef();
+  const passwordRef = useRef();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSubmit({
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="email">Email</label>
+      <input ref={emailRef} type="email" id="email" />
+      <label htmlFor="password">Password</label>
+      <input ref={passwordRef} type="password" id="password" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
+
+render(<App />);
+```
+
+將 React 的狀態盡可能地保持在元件本身，是一個重要的概念。通過將狀態保持在元件本身，可以簡化程式碼，減少複雜性，並使程式碼更容易維護。

@@ -1,0 +1,155 @@
+---
+id: react-scroll-animations
+title: React Scroll Animations
+description: 我們可以透過 `IntersectionObserver` 來偵測元素是否在視窗中，並且透過 CSS transition 來實現滾動時的動畫效果。這個方法不需要任何第三方套件，而且可以製作成一個通用的動畫元件，讓開發者可以自行決定動畫的效果。
+sidebar_label: React Scroll Animations
+hide_title: true
+hide_table_of_contents: false
+tags: [react, css, animations]
+draft: false
+last_updated: 2022-09-24
+---
+
+<profile
+  title="Simple React Scroll Animations With Zero Dependencies"
+  url="https://betterprogramming.pub/simple-react-scroll-animations-with-zero-dependencies-b496c1e1c7bd"
+  author="Bret Cameron"
+  level="beginner"
+  category={["react/next", "html/css"]}
+/>
+
+我們可以透過 `IntersectionObserver` 來偵測元素是否在視窗中，並且透過 CSS transition 來實現滾動時的動畫效果。這個方法不需要任何第三方套件，而且可以製作成一個通用的動畫元件，讓開發者可以自行決定動畫的效果。
+
+<fig
+  src="/img/reading/react-next/2022-09-24-react-scroll-animations/scroll-demo.gif"
+  caption="Scroll Demo"
+/>
+
+## Step 1. Create a custom hook `useElementOnScreen`
+
+首先，我們先建立一個自訂的 hook `useElementOnScreen` 來偵測元素是否在視窗中。裡面的 `rootMargin` 參數可以讓我們設定一個偏移量，讓動畫在視窗邊緣的某個距離開始，而 `0px` 則是正好在邊緣。
+
+```tsx
+function useElementOnScreen(ref: RefObject<Element>, rootMargin = "0px") {
+  const [isIntersecting, setIsIntersecting] = useState(true);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { rootMargin }
+    );
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+  return isIntersecting;
+}
+```
+
+## Step 2. Wrap the hook and animation into a container component
+
+第二步，我們將 `useElementOnScreen` hook 和 CSS transition 整合到一個 container component 中。 `useElementOnScreen` hook 會回傳一個 `boolean` 值，我們可以利用這個值來決定元素的 `opacity` 和 `translate` 效果。 `opacity` 會在元素進入視窗時變為 `1`，而 `translate` 則是在元素進入視窗時會從 `0 2rem` 變為 `none`，也就是沒有位移。
+
+```tsx
+const AnimateIn: FC<PropsWithChildren> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const onScreen = useElementOnScreen(ref);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: onScreen ? 1 : 0,
+        translate: onScreen ? "none" : "0 2rem",
+        transition: "600ms ease-in-out",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+要使用這個 container，我們只需要將我們的元件包在 children 即可。 到這邊，我們已經建立了一個可以做淡入動畫的元件，而且不需要任何第三方套件。
+
+```tsx
+<AnimateIn>
+  <h1>Hello World</h1>
+</AnimateIn>
+```
+
+## Bonus: Generic Animated Container
+
+我們可以進一步將 `<AnimatedIn>` 元件變得更通用，透過傳入 `CSSProperties` 來決定元件的 `from` 和 `to` 狀態，讓開發者可以自行決定動畫的效果。
+
+```tsx
+const AnimateIn: FC<
+  PropsWithChildren<{ from: CSSProperties; to: CSSProperties }>
+> = ({ from, to, children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const onScreen = useElementOnScreen(ref);
+  const defaultStyles: CSSProperties = {
+    transition: "600ms ease-in-out",
+  };
+  return (
+    <div
+      ref={ref}
+      style={
+        onScreen
+          ? {
+              ...defaultStyles,
+              ...to,
+            }
+          : {
+              ...defaultStyles,
+              ...from,
+            }
+      }
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+現在我們可以傳入不同的 `from` 和 `to` **CSSProperties** 來產生不同的動畫元件。
+
+```tsx
+const FadeIn: FC<PropsWithChildren> = ({ children }) => (
+  <AnimateIn from={{ opacity: 0 }} to={{ opacity: 1 }}>
+    {children}
+  </AnimateIn>
+);
+
+const FadeUp: FC<PropsWithChildren> = ({ children }) => (
+  <AnimateIn
+    from={{ opacity: 0, translate: "0 2rem" }}
+    to={{ opacity: 1, translate: "none" }}
+  >
+    {children}
+  </AnimateIn>
+);
+
+const ScaleIn: FC<PropsWithChildren> = ({ children }) => (
+  <AnimateIn from={{ scale: "0" }} to={{ scale: "1" }}>
+    {children}
+  </AnimateIn>
+);
+
+export const Animate = {
+  FadeIn,
+  FadeUp,
+  ScaleIn,
+};
+
+<Animate.ScaleIn>
+  <h1>Hello World</h1>
+</Animate.ScaleIn>;
+```

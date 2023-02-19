@@ -1,0 +1,113 @@
+---
+id: state-in-urlsearchparams
+title: State in URLSearchParams
+description: 本篇文章介紹了在 React 中如何使用 URLSearchParams 儲存狀態，以及如何使用 React Router 提供的 useSearchParams 和 useLocation 來管理和分享狀態。還封裝了一個 useSearchParamsState，提供了類似 useState 的 API。
+sidebar_label: State in URLSearchParams
+hide_title: true
+hide_table_of_contents: false
+tags: [react, react-router, urlsearchparams]
+draft: false
+last_updated: 2022-09-24
+---
+
+<profile
+  title="React: storing state in URL with URLSearchParams"
+  url="https://blog.johnnyreilly.com/2022/09/20/react-usesearchparamsstate?utm_source=pocket_mylist"
+  author="John Reilly"
+  level="intermediate"
+  category={["react/next"]}
+/>
+
+本篇文章介紹了在 React 中如何使用 URLSearchParams 儲存狀態，以及如何使用 React Router 提供的 useSearchParams 和 useLocation 來管理和分享狀態。還封裝了一個 useSearchParamsState，提供了類似 useState 的 API。
+
+## Stateful URL
+
+在 React 中，簡單的 `useState` 雖然可以管理狀態，但並不能長久保存，也不能分享給多個頁面。但有了 [`URLSearchParams`](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)，只要 URL 長度沒有超過限制 ([約 2000 個字符](https://stackoverflow.com/a/417184/761388))，我們就可以將狀態保存在 URL 中，並且可以分享給其他頁面。在下面的例子，我們將 `greeting` 和 `name` 兩個變數保存在 URL 中。
+
+```
+https://our-app.com?greeting=hi&name=john
+```
+
+## React Router - `useSearchParams`
+
+[React Router](https://reactrouter.com/en/main) 提供了 `useSearchParams`，可以很方便地讓我們使用 `URLSearchParams` 來管理並分享狀態。
+
+```js
+import { useSearchParams } from "react-router-dom";
+const [searchParams, setSearchParams] = useSearchParams();
+
+// will set URL like: https://our-app.com?greeting=bonjour
+// this value will feed through to anything driven by the URL
+setSearchParams({ greeting: "bonjour" });
+
+// this will be "bonjour"
+const greeting = searchParams.get("greeting");
+```
+
+## `useSearchParamsState`
+
+我們可以進一步將 `useSearchParams` 封裝成 `useSearchParamsState`，讓我們在改變單個參數時，不會丟失其他參數。返回的 `setSearchParamsState` 函數，可以接受一個新的值，並且透過 `Object.assign` 以及 `reduce` 的技巧，將新的值與舊的值合併。
+
+```tsx
+import { useSearchParams } from "react-router-dom";
+
+export function useSearchParamsState(
+  searchParamName: string,
+  defaultValue: string
+): readonly [
+  searchParamsState: string,
+  setSearchParamsState: (newState: string) => void
+] {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const acquiredSearchParam = searchParams.get(searchParamName);
+  const searchParamsState = acquiredSearchParam ?? defaultValue;
+
+  // highlight-start
+  const setSearchParamsState = (newState: string) => {
+    const next = Object.assign(
+      {},
+      [...searchParams.entries()].reduce(
+        (o, [key, value]) => ({ ...o, [key]: value }),
+        {}
+      ),
+      { [searchParamName]: newState }
+    );
+    setSearchParams(next);
+  };
+  // highlight-end
+  return [searchParamsState, setSearchParamsState];
+}
+```
+
+用法像下面這樣，我們傳入一個 `searchParamName` 和 `defaultValue`，就可以得到一個類似 `useState` 的 API。
+
+```tsx
+const [greeting, setGreeting] = useSearchParamsState("greeting", "hello");
+```
+
+:::note
+[更深入了解 Object.assign](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)，這裡提供一個簡單的範例：
+
+```js
+var o1 = { a: 1, b: 1 };
+var o2 = { b: 2 };
+var o3 = { c: 3 };
+
+var obj = Object.assign(o1, o2, o3);
+console.log(obj); // { a: 1, b: 2, c: 3 }
+console.log(o1); // { a: 1, b: 2, c: 3 }, 放在第一個的物件本身也會被改變。
+```
+
+:::
+
+## Persisting query across pages
+
+只有 `useSearchParamsState` 是不足以在頁面之間傳遞參數的。為了做到這一點，我們需要使用 `useLocation` 來獲取當前的參數，並將它們傳遞給其他連結。
+
+```tsx
+import { useLocation } from "react-router-dom";
+
+const [location] = useLocation();
+return (<Link to={`/my-page${location.search}`}>Page</>)
+```

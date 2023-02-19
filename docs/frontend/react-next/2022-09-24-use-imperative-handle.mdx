@@ -1,0 +1,90 @@
+---
+id: use-imperative-handle
+title: useImperativeHandle
+description: 本文將介紹 useImperativeHandle 這個 hook，它可以讓我們攔截父元件傳遞的 ref，並回傳一組新的方法給該 ref。 這個 hook 通常會搭配 forwardRef 一起使用，讓我們在自定義元件中取得 DOM reference，並且可以在父元件中使用子元件的函式。
+sidebar_label: useImperativeHandle
+hide_title: true
+hide_table_of_contents: false
+tags: [react, forwardRef, useImperativeHandle]
+draft: false
+last_updated: 2022-09-24
+---
+
+<profile
+  title="When to use “useImperativeHandle” and “forwardRefs” in React 18"
+  url="https://betterprogramming.pub/when-to-use-useimperativehandle-and-forwardrefs-in-react-18-89cce42b3309"
+  author="Sameer Kumar"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+本文將介紹 `useImperativeHandle` 這個 hook，它可以讓我們攔截父元件傳遞的 `ref`，並回傳一組新的方法給該 `ref`。 這個 hook 通常會搭配 `forwardRef` 一起使用，讓我們在自定義元件中取得 DOM reference，並且可以在父元件中使用子元件的函式。
+
+:::info
+💡 Learn more details about `useImperativeHandle` in **[Learn
+useImperativeHandle In 10
+Minutes](https://www.youtube.com/watch?v=zpEyAOkytkU).**
+:::
+
+## When to use `React.forwardRef`
+
+當我們想要在<highlight>自定義元件中取得 DOM reference 時，我們會使用 `forwardRef` 來包裝該元件</highlight>。在下面的範例中，我們將
+`<NinjaButton>` 包裝在 `forwardRef` 中，並將 `ref` 指定給內部的 `<button>`。這樣一來，我們在使用 `<NinjaButton>` 時，就可以取得該元件內部的 `<button>` 的 reference。
+
+```jsx live noInline
+const NinjaButton = React.forwardRef((props, ref) => (
+  <button ref={ref}>{props.children}</button>
+));
+
+const App = () => {
+  const btnRef = useRef();
+
+  useEffect(() => {
+    btnRef.current.disabled = true;
+  }, []);
+
+  return <NinjaButton ref={btnRef}>Ninja</NinjaButton>;
+};
+
+render(<App />);
+```
+
+## When to use `useImperativeHandle`
+
+With the help of `useImperativeHandle`, we can intercept the ref pass from the parent and return **a new set of methods** for that ref. In the following example, `btnRef` receives a new set of methods (`changeStyle` and `customFocus`) from `useImperativeHandle` in the `NinjaButton`. This allows us to use the child's (`NinjaButton`) functions from the parent (`App`).
+
+我們可以在自定義元件中使用 `useImperativeHandle` 來攔截父元件傳遞的 `ref`，並回傳一組新的方法給該 `ref`。在下面的範例中，`btnRef` 從 `NinjaButton` 中的 `useImperativeHandle` 中接收到一組新的方法 (`changeStyle`)。這樣一來，我們就可以在父元件 (`App`) 中使用子元件 (`NinjaButton`) 的函式。
+
+```jsx live noInline
+const NinjaButton = React.forwardRef((props, ref) => {
+  const localRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    changeStyle: ({ textColor, backgroundColor }) => {
+      localRef.current.style.padding = "5px 10px";
+      localRef.current.style.color = textColor;
+      localRef.current.style.background = backgroundColor;
+    },
+  }));
+  return <button ref={localRef}>{props.children}</button>;
+});
+
+const App = () => {
+  const btnRef = useRef();
+
+  useEffect(() => {
+    btnRef.current.changeStyle({
+      textColor: "white",
+      backgroundColor: "black",
+    });
+  }, []);
+
+  return <NinjaButton ref={btnRef}>Ninja</NinjaButton>;
+};
+
+render(<App />);
+```
+
+## Summary
+
+`forwardRef` 是一個高階元件，它可以讓我們在自定義元件中取得 DOM reference。`useImperativeHandle` 是一個 hook，它可以讓我們攔截父元件傳遞的 `ref`，並回傳一組新的方法給該 `ref`。 這兩個元件可以搭配使用，讓我們在自定義元件中取得 DOM reference，並且可以在父元件中使用子元件的函式。

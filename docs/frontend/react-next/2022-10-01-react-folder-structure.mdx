@@ -1,0 +1,144 @@
+---
+id: react-folder-structure
+title: React Folder Structure
+description: React Folder Structure
+sidebar_label: React Folder Structure
+hide_title: true
+hide_table_of_contents: false
+tags: [react, folder-structure]
+draft: true
+last_updated: 2022-10-01
+---
+
+<profile
+  title="Junior vs Senior React Folder Structure - How To Organize React Projects"
+  url="https://www.youtube.com/watch?v=UUga4-z7b6s"
+  author="Web Dev Simplified"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+```
+App/
+└── src/
+    ├── __tests__/
+    │   ├── components/
+    │   └── hooks/
+    ├── components/
+    │   ├── Button.js
+    │   ├── Home.js
+    │   ├── Navbar.js
+    │   ├── TodoList.js
+    │   ├── TodoItem.js
+    │   └── ...
+    ├── hooks/
+    │   ├── useFetch.js
+    │   ├── useLocalStorage.js
+    │   ├── useTodo.js
+    │   └── ...
+    ├── App.js
+    ├── App.test.js
+    ├── formatCurrency.js
+    ├── formateDate.js
+    ├── index.css
+    ├── index.js
+    ├── logo.svg
+    ├── setupTests.js
+    └── TodoContext.js
+```
+
+```
+App/
+└── src/
+    ├── assets/
+    │   ├── global.css
+    │   └── logo.svg
+    ├── components/
+    │   ├── __tests__/
+    │   │   └── Navbar.test.js
+    │   ├── form/
+    │   │   ├── __tests__/
+    │   │   ├── FormInput.js
+    │   │   └── FormSelect.js
+    │   ├── ui/
+    │   │   ├── __tests__/
+    │   │   └── Button.js
+    │   └── Navbar.js
+    ├── context/
+    │   ├── __tests__/
+    │   └── AuthContext.js
+    ├── data/
+    │   ├── configValues.json
+    │   ├── constants.js
+    │   └── defaultTodos.json
+    ├── hooks/
+    │   ├── __tests__/
+    │   ├── useFetch.js
+    │   └── useLocalStorage.js
+    ├── pages/
+    │   ├── Home/
+    │   ├── Login/
+    │   ├── Signup/
+    │   └── Settings/
+    │       ├── index.js
+    │       ├── SettingsContext.js
+    │       ├── SettingsForm.js
+    │       └── useSettings.js
+    ├── utils/
+    │   ├── __tests__/
+    │   ├── formatCurrency.js
+    │   └── formateDate.js
+    ├── App.js
+    ├── App.test.js
+    └── index.js
+```
+
+```
+App/
+└── src/
+    ├── assets/
+    ├── components/
+    │   ├── ui/
+    │   ├── form/
+    │   └── layouts/
+    │       ├── __tests__/
+    │       └── Navbar.js
+    ├── context/
+    ├── data/
+    ├── features/
+    │   ├── authentication/
+    │   │   ├── assets/
+    │   │   ├── context/
+    │   │   ├── components/
+    │   │   │   ├── __tests__/
+    │   │   │   └── LoginForm.js
+    │   │   ├── hooks/
+    │   │   │   ├── __tests__/
+    │   │   │   ├── useLogin.js
+    │   │   │   └── useSignup.js
+    │   │   ├── services/
+    │   │   │   ├── __tests__/
+    │   │   │   ├── getUser.js
+    │   │   │   ├── login.js
+    │   │   │   └── signup.js
+    │   │   └── index.js
+    │   ├── settings/
+    │   └── todos/
+    ├── hooks/
+    ├── lib/
+    │   ├── __tests__/
+    │   └── fetch.js
+    ├── pages/
+    │   ├── __tests__/
+    │   ├── Home.js
+    │   ├── Login.js
+    │   ├── Signup.js
+    │   └── Settings.js
+    ├── services/
+    │   ├── __tests__/
+    │   └── analytics.js
+    ├── utils/
+    ├── App.js
+    ├── App.test.js
+    └── index.js
+```
