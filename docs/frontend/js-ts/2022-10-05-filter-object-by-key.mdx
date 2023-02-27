@@ -1,0 +1,53 @@
+---
+id: filter-object-by-key
+title: Filter Object by Key
+description: 當使用 JavaScript 物件時，有時候我們會想根據 key 來過濾物件，這篇文章將會介紹兩種不同的方法來達成這個目的。
+sidebar_label: Filter Object by Key
+hide_title: true
+hide_table_of_contents: false
+tags: [javascript, object, filter]
+draft: false
+last_updated: 2022-10-05
+---
+
+<profile
+  title="How to Filter an Object by Key in JavaScript"
+  url="https://masteringjs.io/tutorials/fundamentals/filter-key"
+  author="masteringjs.io"
+  level="beginner"
+  category={["js/ts"]}
+/>
+
+當使用 JavaScript 物件時，有時候我們會想根據 key 來過濾物件，這篇文章將會介紹兩種不同的方法來達成這個目的。
+
+## 方法 1: `Object.keys` 和 `reduce`
+
+第一種方法先使用 `Object.keys` 取得物件的 key 陣列。接著依據所需的條件篩選 key 陣列，最後使用 reduce 重建一個新的物件。以下是示範如何使用此方法的範例：
+
+```jsx live noInline
+const obj = { firstName: "Jay", lastName: "Wang", age: 100 };
+
+const filteredObj = Object.keys(obj)
+  .filter((key) => key.includes("Name"))
+  .reduce((cur, key) => ({ ...cur, [key]: obj[key] }), {});
+
+render(JSON.stringify(filteredObj));
+```
+
+## 方法 2: `Object.entries` 和 `fromEntries`
+
+第二種方法使用 `Object.entries` 將物件轉換成一個 key-value pair 所組成的陣列，例如 `{ firstName: "Jay" }` 會轉換成 `[["firstName", "Jay"]]`。接著我們可以篩選該陣列，最後使用 `Object.fromEntries` 將篩選後的陣列轉換回物件。
+
+這個方法的好處是可以同時篩選 key 和 value，以下是示範如何使用此方法的範例：
+
+```jsx live noInline
+const obj = { firstName: "Jay", lastName: "Wang", age: 100 };
+
+const filteredObj = Object.fromEntries(
+  Object.entries(obj).filter(
+    ([key, value]) => key.includes("first") || value > 0
+  )
+);
+
+render(JSON.stringify(filteredObj));
+```

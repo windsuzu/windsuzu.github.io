@@ -1,0 +1,84 @@
+---
+id: is-usestate-asynchronous
+title: Is useState Asynchronous
+description: 這篇文章深入探討了 useState 的同步特性以及錯誤使用方式。特別是在使用 setter 和 getter 同時的情況下，容易出現的錯誤，我們將透過具體的範例，幫助理解錯誤的原因和解決方案。
+sidebar_label: Is useState Asynchronous?
+hide_title: true
+hide_table_of_contents: false
+tags: [useState, react, asynchronous]
+draft: false
+last_updated: 2022-10-09
+---
+
+<profile
+  title="UseState: Asynchronous or what?"
+  url="https://www.youtube.com/watch?v=RAJD4KpX8LA"
+  author="Jack Herrington"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+許多初心者會誤會 `useState` 是非同步的，這是因為他們常常以錯誤的方式使用 `useState`。當我們同時使用 `useState` 的 setter 和 getter 時，getter 並不會馬上使用 setter 設定的值，而是會使用上一次的值。只有在下一次 render 時，getter 才會使用 setter 設定好的值。所以，我們必須記得 `useState` 是同步的，而且每次在使用狀態時，都必須注意要使用最新的值。
+
+## Mistake of using useState
+
+我們用常見的搜尋來說明 `useState` 的錯誤使用方式。假設我們有一個表單，裡面有一個輸入框，當使用者輸入時，我們會把輸入的值存到 `search` 狀態中，並且同時從 API 拿到資料，並把資料存到 `results` 狀態中。
+
+```tsx
+const Search = () => {
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+
+  const onChange = (event) => {
+    // highlight-next-line
+    setSearch(event.target.value);
+
+    // error-next-line
+    fetch(`/search?${search}`) // still the old "search"
+      .then((resp) => resp.json())
+      .then(setResults);
+  };
+
+  return (
+    <div>
+      <input value={search} onChange={onChange} />
+      {results &&
+        results.map((result) => <div key={result.id}>{result.title}</div>)}
+    </div>
+  );
+};
+```
+
+在上面的範例中，我們在 `onChange` 中，先設定 `search` 狀態，然後再去拿資料。但由於同步的特性，裡面的 `setSearch` 和 `fetch` 是同時執行的，所以 `fetch` 中的 `search` 會是上一次的值，而不是我們丟給 `setSearch` 的值。
+
+當我們 `setSearch` 時，該組件會重新渲染（value 和 onChange 都會更新）。然後，由於我們使用空字串進行的 `fetch` 已經被非同步解析完畢，它也會觸發 `setResults` 從而再次導致該組件重新渲染。最終，我們不但不會得到我們想要的結果，害造成元件產生多餘的渲染。
+
+## Solve the problem
+
+最簡單的做法是在 `onChange` 時，直接利用 `event.target.value` 取得最新的值，並且把它傳給 `setSearch` 以及 `fetch`。
+
+```tsx
+const Search = () => {
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+
+  const onChange = (event) => {
+    const searchValue = event.target.value;
+    setSearch(searchValue);
+
+    fetch(`/search?${searchValue}`)
+      .then((resp) => resp.json())
+      .then(setResults);
+  };
+
+  return (
+    <div>
+      <input value={search} onChange={onChange} />
+      {results &&
+        results.map((result) => <div key={result.id}>{result.title}</div>)}
+    </div>
+  );
+};
+```
+
+總之，我們要記住 `useState` 是同步的。在同時設置和使用狀態時，使用最新的值至關重要，以避免出現錯誤。

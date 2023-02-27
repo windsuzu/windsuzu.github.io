@@ -1,0 +1,218 @@
+---
+id: subpath-imports-in-rollup
+title: Subpath Imports in Rollup
+description: 這篇文章主要介紹了如何使用 subpath imports 實現單獨導入元件的功能，單獨使用每個元件的時候，不需要再導入整個元件庫，優化元件庫的效能。關鍵在於透過 rollup-plugin-generate-package-json 等插件和函式，在設置 rollup.config.js 時為每個元件單獨生成 index.js、index.d.ts 和 package.json 檔案。
+sidebar_label: Subpath Imports in Rollup
+hide_title: true
+hide_table_of_contents: false
+tags: [rollup, subpath-imports, typescript, react, ui-library]
+draft: false
+last_updated: 2022-10-17
+---
+
+<profile
+  title="How to support subpath imports using React+Rollup+Typescript"
+  url="https://medium.com/singapore-gds/how-to-support-subpath-imports-using-react-rollup-typescript-1d3d331f821b"
+  author="Chong Lu Khei"
+  level="intermediate"
+  category={["other", "js/ts", "react/next"]}
+/>
+
+當我們想要開發一個 React UI library 時，大部分的教學都會直接將所有的元件透過 `index.ts` 來匯出，這樣的好處是使用者可以直接透過 `import { Button, Card, ... } from 'my-library'` 來引入所有的元件。但是這樣的缺點是，當 library 越來越大時，我們想要引入某個元件，就必須將整個 library 都引入進來。
+
+我們可以利用 **subpath imports** 來解決這個問題。透過 `import { Button } from 'my-library/button'` 來引入單一元件，而不是將整個 library 都引入，可以減少 bundle 的大小。這個教學會以 React + Rollup + Typescript 為例，來介紹如何以 subpath imports 的方式打包一個 React UI library。
+
+## The goal of the `dist` folder
+
+我們希望最後打包出來的 `dist` 資料夾能夠呈現以下的架構，每個元件都擁有自己的資料夾，裡面包含了該元件的 `package.json`、`index.d.ts`、`index.js`、`index.js.map` 等等。這樣可以讓使用者在引入元件時，只需要引入該元件所對應的資料夾即可，不需要將整個 library 引入進來。例如 `dist/Accordion` 和 `dist/Alert`。同時，在整個 library 的根目錄下，也需要有一些檔案和資料夾，處理整個 library 的 cjs、esm 和 types definition 的 entry point 以及 `package.json` 等等。
+
+```js
+dist
+// highlight-next-line
+├── Accordion
+│   ├── Accordion.d.ts
+│   ├── AccordionBody.d.ts
+│   ├── AccordionButton.d.ts
+│   ├── AccordionCollapse.d.ts
+│   ├── AccordionContext.d.ts
+│   ├── AccordionHeader.d.ts
+│   ├── AccordionItem.d.ts
+│   ├── AccordionItemContext.d.ts
+│   ├── index.d.ts                // --> types definition entry point for Accordion component only
+│   ├── index.js                  // --> esm entry point for Accordion component only
+│   ├── index.js.map
+│   └── package.json              // --> package.json for Accordion component only
+// highlight-next-line
+├── Alert
+│   ├── Alert.d.ts
+│   ├── AlertHeading.d.ts
+│   ├── AlertLink.d.ts
+│   ├── index.d.ts
+│   ├── index.js
+│   ├── index.js.map
+│   └── package.json
+...
+// error-next-line
+├── cjs
+│   ├── index.js        //--> cjs format entry point of whole library
+│   └── index.js.map
+// error-next-line
+├── index.d.ts
+// error-next-line
+├── index.js            // --> esm format entry point of whole library
+├── index.js.map
+// error-next-line
+├── package.json        // --> package.json file for the whole library
+```
+
+## Steps for Implementing Subpath Imports
+
+接下來我們要按照以下五個步驟來實現 subpath imports：
+
+1. 在每個元件的資料夾中建立 `index.ts` 檔案，然後在該檔案中匯出該元件和 `props`。另外，在專案最頂層的 `index.ts` 檔案中也匯出所有元件的 `index.ts` 檔案。這樣，我們的 UI library 就可以使用兩種方式引入元件了：
+
+- `import { Component } from 'my-ui-library/components'`
+- `import { Component } from 'my-ui-library'`。
+
+```jsx
+// src/accordion/index.ts
+export { Accordion } from "./accordion";
+export type { AccordionProps } from "./accordion";
+```
+
+```jsx
+// src/index.ts
+export * from "./accordion";
+export * from "./alert";
+...
+```
+
+2. 在 `tsconfig.json` 中指定輸出的路徑和 type 的路徑。
+
+```jsx
+// ./tsconfig.json
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
+    // output .d.ts declaration files for consumers
+    "declaration": true,
+    // highlight-next-line
+    "declarationDir": "dist",
+    // output .js.map sourcemap files for consumers
+    "sourceMap": true,
+    // highlight-next-line
+    "rootDir": "src",
+    ...
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "build",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.tsx"
+  ]
+}
+```
+
+3. 在 `package.json` 檔案中指定 `main`、`module` 和 `typings` 的文件路徑，這三個文件分別代表以下內容：
+
+- `main`：指定模組的入口檔案路徑。
+- `module`：表示 ES6 模組的入口檔案路徑。如果這個欄位不存在，Node.js 會使用 `main` 欄位。
+- `typings`：指定 TypeScript 型別檔案的路徑。
+
+```jsx
+// ./package.json
+"scripts": {
+	"rollup": "rm -rf dist && rollup -c",
+	"build": "npm run rollup && npm run post:build",
+	"post:build": "node ./scripts/frankBuild.js",
+...
+},
+// highlight-start
+"main": "dist/cjs/index.js",   // points to the entry point for cjs format of the library
+"module": "dist/index.js",     // points to the entry point for esm format of the library
+"typings": "dist/index.d.ts",  // points to the entry point for type definitions of the above two files
+// highlight-end
+```
+
+4. 為了在打包的每個元件中生成獨立的 `index.js`、`index.d.ts` 和 `package.json` 檔案，我們需要在 `rollup.config.js` 中添加一些函式。
+
+- 定義 `subfolderPlugins()` 方法，為每個元件單獨生成 `index.js`、`index.d.ts` 和 `package.json` 檔案。
+- 定義 `folderBuilds()` 方法，遍歷所有元件資料夾，為每個元件生成輸出。
+
+```jsx
+// ./rollup.config.js
+const plugins = [
+  peerDepsExternal(),
+  resolve(),
+  commonjs(),
+  typescript({
+    tsconfig: "./tsconfig.json",
+    useTsconfigDeclarationDir: true,
+  }),
+  terser(),
+];
+
+// Specify plugins for a given component
+// If your folder structure is different than the author's, you will have to adjust it slightly.
+// highlight-next-line
+const subfolderPlugins = (folderName) => [
+  ...plugins,
+  generatePackageJson({
+    baseContents: {
+      name: `${packageJson.name}/${folderName}`,
+      private: true,
+      main: "../cjs/index.js", // --> points to cjs format entry point of whole library
+      module: "./index.js", // --> points to esm format entry point of individual component
+      types: "./index.d.ts", // --> points to types definition file of individual component
+    },
+  }),
+];
+
+// Loop through all component folders and generates the output for each component.
+// If your folder structure is different than the author's, you will have to adjust it slightly.
+// highlight-next-line
+const folderBuilds = getFolders("./src").map((folder) => {
+  return {
+    input: `src/${folder}/index.ts`,
+    output: {
+      file: `dist/${folder}/index.js`,
+      sourcemap: true,
+      exports: "named",
+      format: "esm",
+    },
+    plugins: subfolderPlugins(folder),
+    external: ["react", "react-dom"],
+  };
+});
+
+export default [
+  {
+    input: ["src/index.ts"],
+    output: [
+      {
+        file: packageJson.module,
+        format: "esm",
+        sourcemap: true,
+        exports: "named",
+      },
+      {
+        file: packageJson.main,
+        format: "cjs",
+        sourcemap: true,
+        exports: "named",
+      },
+    ],
+    plugins,
+    external: ["react", "react-dom"],
+  },
+  // highlight-next-line
+  ...folderBuilds, // Generate outputs for all components by using the entry point of each component
+];
+```
+
+5. 在執行 `build` 之後，我們需要將 `package.json` 中的相關內容複製到 `dist/package.json` 中。為此，作者建立了一個 `frankBuild.js` 腳本來實現。你可以[在此處查看程式碼片段](https://gist.github.com/clukhei/38f64ffa79f2045b816c0696dc3add67)。
+
+遵循上述步驟後，我們就可以實現 subpath imports 的功能，單獨使用每個元件的時候，不需要再導入整個元件庫，優化元件庫的效能。關鍵在於透過 `rollup-plugin-generate-package-json` 等插件和函式，在設置 `rollup.config.js` 時為每個元件單獨生成 `index.js`、`index.d.ts` 和 `package.json` 檔案。

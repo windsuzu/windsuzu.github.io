@@ -1,12 +1,12 @@
 ---
 id: react-folder-structure
 title: React Folder Structure
-description: React Folder Structure
+description: React 專案的結構可以分成三個等級：初級、中級和高級，而每個等級的結構對於不同大小的專案都有不同的適用情況。在初級結構中，所有重要的元件、頁面、版面都會放在 `components/` 資料夾中。而較大型的專案則可以使用中級或高級結構，將檔案分類更清晰。如果你正在開發 React 專案，可以參考這些結構來更有效率地組織你的檔案。
 sidebar_label: React Folder Structure
 hide_title: true
 hide_table_of_contents: false
 tags: [react, folder-structure]
-draft: true
+draft: false
 last_updated: 2022-10-01
 ---
 
@@ -18,127 +18,164 @@ last_updated: 2022-10-01
   category={["react/next"]}
 />
 
-```
-App/
-└── src/
-    ├── __tests__/
-    │   ├── components/
-    │   └── hooks/
-    ├── components/
-    │   ├── Button.js
-    │   ├── Home.js
-    │   ├── Navbar.js
-    │   ├── TodoList.js
-    │   ├── TodoItem.js
-    │   └── ...
-    ├── hooks/
-    │   ├── useFetch.js
-    │   ├── useLocalStorage.js
-    │   ├── useTodo.js
-    │   └── ...
-    ├── App.js
-    ├── App.test.js
-    ├── formatCurrency.js
-    ├── formateDate.js
-    ├── index.css
-    ├── index.js
-    ├── logo.svg
-    ├── setupTests.js
-    └── TodoContext.js
-```
+React 專案的結構可以分成三個等級：初級、中級和高級，而每個等級的結構對於不同大小的專案都有不同的適用情況。在初級結構中，所有重要的元件、頁面、版面都會放在 `components/` 資料夾中。而較大型的專案則可以使用中級或高級結構，將檔案分類更清晰。如果你正在開發 React 專案，可以參考這些結構來更有效率地組織你的檔案。
+
+## 初級結構
+
+這種結構通常適用於只有一到兩個主要功能的小型專案。這種結構的優點是非常簡單，並且可以快速開始開發。但是，隨著專案的增長，這種結構可能會變得非常混亂，因為所有的檔案都放在同一個資料夾中，沒有依照功能分類。
+
+- `src/` 根目錄不僅包含基本組件（如 `index.js`、`App.js`），還包含一些實用函數（如 `formatDate.js`）或 Context（如 `TodoContext.js`）
+- `components/` 包含所有的建構元素，如頁面、小部件、佈局等。
+- `hooks/` 是用來放置一些常用的 hook，如 `useLocalStorage.js` 等，以及與某些特定功能相關的 hook，如 `useTodo.js` 等
+- `__test__` 包含所有的測試
 
 ```
-App/
-└── src/
-    ├── assets/
-    │   ├── global.css
-    │   └── logo.svg
-    ├── components/
-    │   ├── __tests__/
-    │   │   └── Navbar.test.js
-    │   ├── form/
-    │   │   ├── __tests__/
-    │   │   ├── FormInput.js
-    │   │   └── FormSelect.js
-    │   ├── ui/
-    │   │   ├── __tests__/
-    │   │   └── Button.js
-    │   └── Navbar.js
-    ├── context/
-    │   ├── __tests__/
-    │   └── AuthContext.js
-    ├── data/
-    │   ├── configValues.json
-    │   ├── constants.js
-    │   └── defaultTodos.json
-    ├── hooks/
-    │   ├── __tests__/
-    │   ├── useFetch.js
-    │   └── useLocalStorage.js
-    ├── pages/
-    │   ├── Home/
-    │   ├── Login/
-    │   ├── Signup/
-    │   └── Settings/
-    │       ├── index.js
-    │       ├── SettingsContext.js
-    │       ├── SettingsForm.js
-    │       └── useSettings.js
-    ├── utils/
-    │   ├── __tests__/
-    │   ├── formatCurrency.js
-    │   └── formateDate.js
-    ├── App.js
-    ├── App.test.js
-    └── index.js
+src/
+├── components/
+│   ├── Button.js
+│   ├── Home.js
+│   ├── Navbar.js
+│   ├── TodoList.js
+│   ├── TodoItem.js
+│   └── ...
+├── hooks/
+│   ├── useFetch.js
+│   ├── useLocalStorage.js
+│   ├── useTodo.js
+│   └── ...
+├── __tests__/
+│   ├── components/
+│   └── hooks/
+├── App.js
+├── App.test.js
+├── formatCurrency.js
+├── formateDate.js
+├── index.css
+├── index.js
+├── logo.svg
+├── setupTests.js
+└── TodoContext.js
 ```
 
+## 中級結構
+
+這種結構更適用於較大的專案，它會將文件更仔細地組織起來。透過 `pages/` 將主功能和一般功能分開放置。
+
+- `assets/` 包含所有非程式碼的文件。例如，圖片、字體等
+- `context/` 包含與 `ContextProvider` 和 `useContext` 相關的程式碼
+- `data/` 包含靜態的變數和 json 文件，例如 `constants.js`、`defaultTodos.json` 等
+- `hooks/` 包含所有地方都可以使用的 general hooks，例如 `useFetch.js`、`useLocalStorage.js` 等
+- `utils/` 包含所有地方都可以使用的 general 函數，例如 `formatCurrency.js`、`formateDate.js` 等
+- `components/` 包含所有的建構 general 元素，例如 `Navbar.js`、`Button.js` 等，而不是與某個特定功能相關的元素
+- `pages/` 包含所有的頁面與相關的元素，例如 `Home/`、`Login/`、`Signup/` 等，每個頁面都有自己的資料夾。但每個資料夾都擁有自己的 **context、hooks、components** 等。舉例來說，`SettingContext.js`、`SettingsForm.js`、`useSettings.js` 等都是與 `Settings/` 相關的元素，因此它們都應該放在 `Settings/` 資料夾中。
+
 ```
-App/
-└── src/
-    ├── assets/
-    ├── components/
-    │   ├── ui/
-    │   ├── form/
-    │   └── layouts/
-    │       ├── __tests__/
-    │       └── Navbar.js
-    ├── context/
-    ├── data/
-    ├── features/
-    │   ├── authentication/
-    │   │   ├── assets/
-    │   │   ├── context/
-    │   │   ├── components/
-    │   │   │   ├── __tests__/
-    │   │   │   └── LoginForm.js
-    │   │   ├── hooks/
-    │   │   │   ├── __tests__/
-    │   │   │   ├── useLogin.js
-    │   │   │   └── useSignup.js
-    │   │   ├── services/
-    │   │   │   ├── __tests__/
-    │   │   │   ├── getUser.js
-    │   │   │   ├── login.js
-    │   │   │   └── signup.js
-    │   │   └── index.js
-    │   ├── settings/
-    │   └── todos/
-    ├── hooks/
-    ├── lib/
-    │   ├── __tests__/
-    │   └── fetch.js
-    ├── pages/
-    │   ├── __tests__/
-    │   ├── Home.js
-    │   ├── Login.js
-    │   ├── Signup.js
-    │   └── Settings.js
-    ├── services/
-    │   ├── __tests__/
-    │   └── analytics.js
-    ├── utils/
-    ├── App.js
-    ├── App.test.js
-    └── index.js
+src/
+├── assets/
+│   ├── global.css
+│   └── logo.svg
+├── components/
+│   ├── __tests__/
+│   │   └── Navbar.test.js
+│   ├── form/
+│   │   ├── __tests__/
+│   │   ├── FormInput.js
+│   │   └── FormSelect.js
+│   ├── ui/
+│   │   ├── __tests__/
+│   │   └── Button.js
+│   └── Navbar.js
+├── context/
+│   ├── __tests__/
+│   └── AuthContext.js
+├── data/
+│   ├── configValues.json
+│   ├── constants.js
+│   └── defaultTodos.json
+├── hooks/
+│   ├── __tests__/
+│   ├── useFetch.js
+│   └── useLocalStorage.js
+├── pages/
+│   ├── Home/
+│   ├── Login/
+│   ├── Signup/
+│   └── Settings/
+│       ├── index.js
+│       ├── SettingsContext.js
+│       ├── SettingsForm.js
+│       └── useSettings.js
+├── utils/
+│   ├── __tests__/
+│   ├── formatCurrency.js
+│   └── formateDate.js
+├── App.js
+├── App.test.js
+└── index.js
 ```
+
+:::info 中級結構的問題
+當你的專案越來越大，有的 **context, hooks, utils, components** 可能被多個頁面使用，這時候你應該把它們放在哪裡呢？
+:::
+
+## 進階結構
+
+這種結構解決了中級結構中提到的問題。首先，我們清理了 `pages/` 文件夾，使其僅包含頁面文件。然後，我們創建了一個新的文件夾 `features/`，並在其中依照功能特性建立不同的資料夾，例如身份驗證、設置、待辦事項。並且，我們將每個在 `features/` 的文件夾結構都保持與根目錄相同。
+
+- `assets/`、`context/`、`data/`、`hooks/`、`utils/` 與中級結構完全相同
+- `components/` 新增了一個 `layouts/` 文件夾，專門用於存放在整個網站都會使用到的元件，例如 `Navbar.js`、`Footer.js` 等
+- `lib/` 包含了以 [Facade Pattern](https://www.youtube.com/watch?v=fHPa5xzbpaA) 設計的 API 來使用其他三方庫（如 axios）的功能。這樣做的好處是，未來如果想要更新或更換第三方庫，只需要在 `lib/` 中修改即可，而不需要在整個專案中修改
+- `services/` 只會存放在整個專案中都會使用到的 API，例如 `login.js`、`signup.js`、`fetchData.js` 等
+- `pages/` 現在只包含頁面文件，而不包含與頁面相關的 context、hooks、utilities、services 和 components
+- `features` 為進階結構中最重要的地方，以功能為單位新建資料夾，每個資料夾存放該功能的所有商業邏輯（context、hooks、utils、services、components）
+
+```
+src/
+├── assets/
+├── components/
+│   ├── ui/
+│   ├── form/
+│   └── layouts/
+│       ├── __tests__/
+│       └── Navbar.js
+├── context/
+├── data/
+├── features/
+│   ├── authentication/
+│   │   ├── assets/
+│   │   ├── context/
+│   │   ├── components/
+│   │   │   ├── __tests__/
+│   │   │   └── LoginForm.js
+│   │   ├── hooks/
+│   │   │   ├── __tests__/
+│   │   │   ├── useLogin.js
+│   │   │   └── useSignup.js
+│   │   ├── services/
+│   │   │   ├── __tests__/
+│   │   │   ├── getUser.js
+│   │   │   ├── login.js
+│   │   │   └── signup.js
+│   │   └── index.js
+│   ├── settings/
+│   └── todos/
+├── hooks/
+├── lib/
+│   ├── __tests__/
+│   └── fetch.js
+├── pages/
+│   ├── __tests__/
+│   ├── Home.js
+│   ├── Login.js
+│   ├── Signup.js
+│   └── Settings.js
+├── services/
+│   ├── __tests__/
+│   └── analytics.js
+├── utils/
+├── App.js
+├── App.test.js
+└── index.js
+```
+
+以上就是 React 專案的三種結構。雖然這三種結構是分為 `初級`、`中級` 和 `高級`，但其實我們可以在不同大小的項目中使用這三種結構策略。

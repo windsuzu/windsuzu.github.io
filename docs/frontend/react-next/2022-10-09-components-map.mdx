@@ -1,0 +1,102 @@
+---
+id: components-map
+title: Components Map
+description: 在 React 中使用 components map 可以更精簡地使用條件式渲染元件。我們可以使用普通的 JavaScript 物件或 Map 創建 components map，以及使用 lazy-loading 使元件動態載入。另外，在切換元件時使用 startTransition 可以避免元件切換閃爍的問題。最後，使用 components map 有一個缺點，就是 map 中的所有元件必須使用相同的 props。
+sidebar_label: Components Map
+hide_title: true
+hide_table_of_contents: false
+tags: [react, components, map, lazy, code-splitting]
+draft: false
+last_updated: 2022-10-09
+---
+
+<profile
+  title="(Lazy) Components Maps"
+  url="https://julesblom.com/writing/lazy-component-maps?ck_subscriber_id=1879469445&utm_source=convertkit&utm_medium=email&utm_campaign=%E2%9A%9B%EF%B8%8F+This+Week+In+React+%23118%3A+Gatsby%2C+Beta+Docs%2C+Reactivity%2C+Lazy+Maps%2C+Ezno%2C+Whyframe%2C+Reassure%2C+Node.js%2C+TypeScript%2C+WASM...%20-%209117597"
+  author="Jules Blom"
+  level="beginner"
+  category={["react/next", "js/ts"]}
+/>
+
+隨著情況不斷的增加，我們要做到條件式的渲染也會變得越來越困難。在 React 中，我們通常會使用 if-else 或是 switch 來條件式的渲染元件。但其實我們可以使用一個 component map 來做到這件事情！
+
+## Component Map
+
+一個 component map 只是一個單純的 Javascript 物件，將鍵值 (key) 對應到 React 元件。以下是一個簡單的範例：
+
+```tsx
+const components = {
+  day: DayPicker,
+  week: WeekPicker,
+  month: MonthPicker,
+  year: YearPicker,
+};
+
+const SelectedPicker = components[type];
+
+return (
+  <SelectedPicker
+    selectedPeriod={selectedPeriod}
+    setSelectedPeriod={setSelectedPeriod}
+  />
+);
+```
+
+:::info
+為了讓 component map 映射出來的元件能在 JSX 中直接使用，這些元件的變數名稱開頭必須大寫！
+:::
+
+我們也可以使用 Map 來產生 component map，以下是一個使用 Map 的範例：
+
+```tsx
+const components = new Map([
+  ["day", DayPicker],
+  ["week", WeekPicker],
+  ["month", MonthPicker],
+  ["year", YearPicker],
+]);
+```
+
+## Lazy Component Map
+
+在上面的範例中，我們使用了一個 component map 來將鍵值對應到 React 元件，但是這個 component map 會在頁面載入時就將所有的元件都載入，這樣可能會導致頁面載入的時間變長，因此我們可以使用 lazy loading (code-splitting) 的方式來將元件動態載入，以下是一個 lazy component map 的範例：
+
+```tsx
+const components = {
+  day: lazy(() => import("./day-picker")),
+  week: lazy(() => import("./week-picker")),
+  month: lazy(() => import("./month-picker")),
+  year: lazy(() => import("./year-picker")),
+};
+
+const SelectedPicker = components[type];
+
+return (
+  <ErrorBoundary FallbackComponent={ErrorFallback} onError={handleError}>
+    <Suspense fallback={<Spinner />}>
+      <SelectedPicker />
+    </Suspense>
+  <ErrorBoundary>
+);
+```
+
+當我們要切換元件時，React 會先將原本的元件移除，然後再將新的元件加入，這樣會導致頁面的閃爍，因此我們可以使用 React 的 [startTransition](https://beta.reactjs.org/reference/react/startTransition) 來解決這個問題，將改變 `useState` 的邏輯包在 `startTransition` 中就可以解決閃爍的問題：
+
+```tsx
+onChange={(e) => startTransition(() => setType(e.target.value))}
+```
+
+## Disadvantages
+
+使用 component map 來做條件式的渲染，可以讓我們的程式碼變得更簡潔，但是也有一個缺點。在 map 裡面的元件，必須要使用同樣的 props，否則就會出現錯誤。這時候就必須要使用 switch 或是 if-else 來做條件式的渲染。
+
+```tsx
+switch (type) {
+  case "day": {
+    return <DayPicker currentDay={today} />;
+  }
+  case "week": {
+    return <WeekPicker currentWeek={week} />;
+  }
+}
+```
