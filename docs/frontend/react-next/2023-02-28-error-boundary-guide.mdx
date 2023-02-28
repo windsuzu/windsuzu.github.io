@@ -1,0 +1,260 @@
+---
+id: error-boundary-guide
+title: ErrorBoundary Guide
+description: 在 React 中，我們無法將整個 useEffect 或子元素裝在 try/catch 來捕獲錯誤，但我們可以使用 ErrorBoundary 來實現這一點。需要注意的是，ErrorBoundary 也有一些限制，例如無法捕獲非同步錯誤或事件處理中的錯誤。但我們可以在 catch 區塊中強制將 React 重新渲染，然後把錯誤丟回重新渲染的生命週期來解決這個問題。
+sidebar_label: ErrorBoundary Guide
+hide_title: true
+hide_table_of_contents: false
+tags: [react, js, error-boundary]
+draft: false
+last_updated: 2023-02-28
+---
+
+<profile
+  title="How to handle errors in React: full guide"
+  url="https://www.developerway.com/posts/how-to-handle-errors-in-react"
+  author="NADIA MAKAREVICH"
+  level="beginner"
+  category={["react/next", "js/ts"]}
+/>
+
+本文介紹了 React 中處理錯誤的兩種方式：使用 `try/catch` 和 `ErrorBoundary`，以及它們各自的限制。使用 `try/catch` 時，它無法捕獲 `hooks` 和子組件中的錯誤。使用 `ErrorBoundary` 時，它無法捕獲**異步代碼 (async code)** 和**事件處理程序 (event handler)** 中的錯誤。但是，可以通過在 `try/catch` 中捕獲錯誤，然後將錯誤重新抛出到 React 的生命週期中，使 `ErrorBoundary` 能夠捕獲這些錯誤。
+
+## Why do we need to catch errors in React?
+
+為什麼我們需要在 React 中捕獲錯誤呢？答案是因為從 React 16 開始，如果沒有捕獲錯誤，React 會直接在生命週期中抛出錯誤，停止整個應用程序，並跳出錯誤頁面。因此，即使錯誤發生在 UI 中的某個不重要的部分，或者是某個你無法控制的第三方庫中，如果沒有捕獲錯誤，整個頁面都會被銷毀，並且向使用者顯示錯誤頁面。
+
+## Review: Catching Errors in JavaScript
+
+在 JavaScript 中，可以使用 `try/catch` 來捕獲錯誤。如果在 `try` 中的代碼中發生錯誤，則可以捕獲錯誤，並在 `catch` 中處理錯誤。這個方法適用於同步程式碼，也適用於非同步程式碼。我們也可以使用 `Promise.then()` 和 `Promise.catch()` 來捕獲非同步的錯誤，但這篇文章以 `try/catch` 為主。
+
+<div style={{columns: "20rem"}}>
+
+```js title="Catch synchronous errors"
+try {
+  doSomethingWrong();
+} catch (error) {
+  // handle error
+}
+```
+
+```js title="Catch asynchronous errors"
+try {
+  await fetch("/bla-bla");
+} catch (error) {
+  // handle error
+}
+```
+
+</div>
+
+## Problems of `try/catch` in React
+
+在 React 中，我們可以使用 `try/catch` 來捕獲錯誤。但是，以下是三種錯誤的使用方式：
+
+### 1. Catch errors in `useEffect`
+
+將 `useEffect` 整個放在 `try/catch` 中是錯誤的。由於 `useEffect` 是在 render 後非同步執行，所以對於 `try/catch` 來說永遠都是成功執行，也就永遠抓不到 `useEffect` 中的錯誤。
+
+```js title="Catch errors in hooks ❌"
+const Component = () => {
+  try {
+    useEffect(() => {
+      doSomethingWrong();
+    }, []);
+  } catch (error) {
+    // never triggered
+  }
+  return <div />;
+};
+```
+
+### 2. Catch errors in `children`
+
+將 `children` 整個放在 `try/catch` 中是錯誤的。不管是在 `try/catch` 中定義 `children`，還是直接在 `try/catch` 中返回 `children`，都是錯誤的。 這是因為當程式執行到 `<Child />` 時，它並不是真正的渲染元件，而是創建了一個元件元素。這個元素只是一個包含元件類型和屬性的對象，而且會在 `try/catch` 執行成功後，在 React 中被使用，與 `useEffect` 的情況類似，所以也是無法捕獲錯誤的。
+
+<div style={{columns:"20rem"}}>
+
+```js title="Catch errors in children ❌"
+const Component = () => {
+  let child;
+
+  try {
+    child = <Child />;
+  } catch (e) {
+    // never triggered
+  }
+  return child;
+};
+```
+
+```js title="Catch errors in children ❌"
+const Component = () => {
+  try {
+    return <Child />;
+  } catch (e) {
+    // never triggered
+  }
+};
+```
+
+</div>
+
+### 3. Catch errors in `render` and Change state
+
+在 `render` 中使用 `try/catch` 來捕獲錯誤，並在 `catch` 中改變 `state`，這是錯誤的。這是因為 `render` 是同步執行的，所以 `try/catch` 會捕獲到錯誤，但是在 `catch` 中改變 `state` 會導致無限循環，因為 `render` 會再次被調用，進而再次觸發 `try/catch`。
+
+```js title="Change state in render ❌"
+const Component = () => {
+  const [hasError, setHasError] = useState(false);
+
+  try {
+    doSomethingComplicated();
+  } catch (e) {
+    // will cause infinite loop
+    setHasError(true);
+  }
+};
+```
+
+## ErrorBoundary in React
+
+為了解決上述問題，React 提供了 `ErrorBoundary` 這個**「概念」** 來捕獲錯誤。我們必須使用舊版的 class component 自行實現一個 `ErrorBoundary`，然後使用它來包住可能會發生錯誤的元件。這個 `ErrorBoundary` 元件包含了幾個生命週期方法，例如
+
+- `constructor` 會初始化一個 `state`，用來存放是否發生錯誤
+- `static getDerivedStateFromError` 會在 `render` 中發生錯誤時被調用，並將 `state` 中的 `hasError` 設置為 `true`，我們就可以根據 `hasError` 來渲染錯誤訊息。這個方法是產生 ErrorBoundary 的必要方法
+- `componentDidCatch` 可以將錯誤訊息加以利用，例如發送到後端，或者使用 `Sentry` 來捕獲錯誤
+
+另外，我們也可以自定義 `ErrorBoundary` 的 `fallback`，這個 `fallback` 會在 `render` 中發生錯誤時被渲染。
+
+```js title="ErrorBoundary Example" live noInline
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    // initialize the error state
+    this.state = { hasError: false };
+  }
+
+  // if an error happened, set the state to true
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // send error to somewhere here
+    console.log(error, errorInfo);
+  }
+
+  render() {
+    // if error happened, return a fallback component
+    if (this.state.hasError) {
+      return this.props.fallback || <>Oh no! Something went wrong!</>;
+    }
+
+    return this.props.children;
+  }
+}
+
+const ErrorComponent = () => {
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    if (counter > 0) throw new Error("error");
+  }, [counter]);
+
+  return (
+    <button onClick={() => setCounter((prev) => prev + 1)}>Click me</button>
+  );
+};
+
+render(
+  <ErrorBoundary fallback={<>Wow it is broken!</>}>
+    <ErrorComponent />
+  </ErrorBoundary>
+);
+```
+
+## ErrorBoundary with Asynchronous Error
+
+上面我們所寫的 `ErrorBoundary` 有一些限制，例如我們不能透過 `ErrorBoundary` 來捕獲非同步的錯誤，例如 `setTimeout`、`Promise`；我們也無法透過 `ErrorBoundary` 來捕獲 Event Handler, Callback 中的錯誤，例如 `onClick`、`onSubmit`。
+
+<div style={{columns:"20rem"}}>
+
+```js title="can't catch errors from event handler ❌"
+const onClick = () => {
+  // this error will disappear into the void
+  throw new Error("Hulk smash!");
+};
+```
+
+```js title="can't catch errors from async function ❌"
+useEffect(() => {
+  //the error will also disappear
+  fetch("/bla");
+}, []);
+```
+
+</div>
+
+不過在 [Throwing Error from hook not caught in error boundary · Issue #14981 · facebook/react](https://github.com/facebook/react/issues/14981#issuecomment-468460187). 中，[Dan Abramov](https://twitter.com/dan_abramov) 提供了一個解決方案。我們可以先在 `try/catch` 中捕獲錯誤，然後在 `catch` 中觸發一次 React 重新渲染，最後再將錯誤丟回重新渲染的生命週期中。這樣 `ErrorBoundary` 就可以像其他錯誤一樣捕獲它們。由於 `useState` 的更新是觸發重新渲染的方式，而 `useState` 的設置函數可以接受一個更新函數作為參數，所以我們可以使用這個更新函數來重新丟出錯誤。
+
+```js title="ErrorBoundary Example" live noInline
+// this is a custom hook to throw error in async function
+const useThrowAsyncError = () => {
+  const [state, setState] = useState();
+  return (error) => {
+    setState(() => {
+      throw error;
+    });
+  };
+};
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <>Oh no! Something went wrong!</>;
+    }
+    return this.props.children;
+  }
+}
+
+const ErrorComponent = () => {
+  const throwAsyncError = useThrowAsyncError();
+  return (
+    <button
+      onClick={() => {
+        try {
+          throw new Error("error");
+        } catch (e) {
+          // this will trigger React to re-render
+          // and throw the error again
+          throwAsyncError(e);
+        }
+      }}
+    >
+      Click me
+    </button>
+  );
+};
+
+render(
+  <ErrorBoundary fallback={<>Wow it is broken!</>}>
+    <ErrorComponent />
+  </ErrorBoundary>
+);
+```
+
+## Conclusion
+
+在 React 中，我們無法透過 `try/catch` 包住整個 `useEffect` 或是子元件 `children` 來捕獲錯誤，但我們可以使用 `ErrorBoundary` 來達成。不過 `ErrorBoundary` 也有一些限制，例如它無法捕獲非同步的錯誤，例如 `setTimeout`、`Promise`；它也無法捕獲 Event Handler, Callback 中的錯誤，例如 `onClick`、`onSubmit`。不過我們可以使用一個自定義的 `useThrowAsyncError` 來解決這個問題。我們可以在 `catch` 中使用 `useThrowAsyncError` 強制觸發 React 重新渲染，最後再將錯誤丟回重新渲染的生命週期中。
+
+另外，我們也可以考慮使用 [bvaughn/react-error-boundary](https://github.com/bvaughn/react-error-boundary) 這個第三方套件來解決這個問題。這個套件提供了 `<ErrorBoundary>` 以及 `useErrorHandler`，讓我們更方便的使用 `ErrorBoundary` 的方式捕捉錯誤。
