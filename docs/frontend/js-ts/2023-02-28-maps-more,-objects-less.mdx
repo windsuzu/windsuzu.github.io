@@ -1,0 +1,222 @@
+---
+id: maps-more,-objects-less
+title: Maps More, Objects Less
+description: JavaScript 的 Object 是一個強大的工具，但它不是在所有場景都是最佳選擇。這篇文章將探討如何使用 Map 來取代 Object，以及何時應該使用它們。
+sidebar_label: Maps More, Objects Less
+hide_title: true
+hide_table_of_contents: false
+tags: [javascript, typescript, object, map]
+draft: false
+last_updated: 2023-02-28
+---
+
+<profile
+  title="Use Maps More and Objects Less"
+  url="https://www.builder.io/blog/maps"
+  author="STEVE SEWELL"
+  level="beginner"
+  category={["js/ts"]}
+/>
+
+JavaScript 的 Object 是一個強大的工具，但它不是在所有場景都是最佳選擇。這篇文章將討論使用 Object 時可能出現的問題，並探索在許多情況下 Map 是更好的選擇。
+
+## Performance issues with Objects
+
+第一個 Objects 會遇到的問題是性能，例如你可能會遇到你的 Object 常常被修改、刪除或新增。這些操作在 Map 上的效能會比 Object 好得很多，在 [MDN 上的 Performance 比較](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map#objects_vs._maps:~:text=of%20an%20object.-,Performance,-Performs%20better%20in)中也有提到，Map 在頻繁新增、刪除 key-value pair 時的效能會比 Object 好得多。
+
+<div style={{ columns: "20rem" }}>
+
+```js title="Object 🚩"
+const mapOfThings = {};
+mapOfThings[myThing.id] = myThing;
+delete mapOfThings[myThing.id];
+```
+
+```js title="Map 🚀"
+const mapOfThings = new Map();
+mapOfThings.set(myThing.id, myThing);
+mapOfThings.delete(myThing.id);
+```
+
+</div>
+
+## Built-in Keys in Objects
+
+第二個 Object 會遇到的問題是它的 key 不只包含自定義的 key，還包含了一些內建的 key，例如 `valueOf`、`constructor`、`toString` 等等。這些內建的 key 會導致一些問題，例如你的 key 值非常隨機，可能會造成內建的 key 被汙染，讓你的 Object 變得不可預測。
+
+```js title="Polluted Object 😱"
+const obj = { a: 1 };
+obj["toString"] = "my value";
+// error-next-line
+obj.toString(); // obj.toString is not a function
+```
+
+這些內建的 keys 也會在迭代時造成問題，例如以下兩種是比較危險的方式迭代一個 Object：
+
+```js title="Dangerous Object Iteration 🚩"
+for (const key in myObject) {
+  // 🚩 可能會遇到一些你沒有想要的 key
+}
+
+for (const key in myObject) {
+  if (myObject.hasOwnProperty(key)) {
+    // 🚩 myObject.hasOwnProperty 可能會被覆寫成任何其他值。
+  }
+}
+```
+
+但是 Map 不會有這些問題，在 Map 直接使用標準的 `for...of` 迭代就可以一次獲得所有的 key-value pair。
+
+```js title="Safe Map Iteration 🚀"
+for (const [key, value] of myMap) {
+  // 🚀 安全的獲得每一個 key-value pair
+}
+
+for (const value of myMap.values()) {
+  // 🙂 你可以只獲得 value
+}
+
+for (const key of myMap.keys()) {
+  // 🙂 你可以只獲得 key
+}
+```
+
+另外，你也可以先將 Object 透過 `Object.entries` 轉換成一個二維陣列，再使用 `for...of` 迭代。
+
+```js title="Safe Object Iteration 🚀"
+for (const [key, value] of Object.entries(myObject)) {
+  // 🙂 安全的從 Object 獲得每一個 key-value pair
+}
+```
+
+## Key Ordering in Objects
+
+第三個 Object 會遇到的問題是它的 key 並不會保持原本的順序，但是在 Map 中 key 會保持原本的順序。例如你可以很方便的獲得一個 Map 的第一個 key-value pair：
+
+```js title="Map First Key 🚀"
+const myMap = new Map(Object.entries({ a: 1, b: 2, c: 3 }));
+const [[firstKey, firstValue]] = myMap;
+// firstKey === "a"
+// firstValue === 1
+```
+
+## Key Types in Objects
+
+第四個 Object 會遇到的問題是它的 key 只能是字串，但是在 Map 中 key 可以是任何值。你甚至可以使用一個 Object 作為 Map 的 key！ 這個特性可以讓你在 Map 中儲存任何值，例如你可以儲存一個 DOM 元素的相關資訊，或是儲存一個函式的相關資訊。
+
+<div style={{ columns: "20rem" }}>
+
+```js title="Anything as Map Key 🚀"
+myMap.set({}, value);
+myMap.set([], value);
+myMap.set(document.body, value);
+myMap.set(function () {}, value);
+myMap.set(myDog, value);
+```
+
+```js title="Store metadata of myTodo Object 🚀"
+const metadata = new Map();
+metadata.set(myTodo, {
+  focused: true,
+});
+metadata.get(myTodo); // { focused: true }
+```
+
+</div>
+
+:::warning
+但是，由於這個 metadata Map 保持著對 myTodo 的引用，所以就算你移除了 myTodo，那麼 garbage collection 也不會將 metadata Map 中的 myTodo 移除，造成 memory leak。
+:::
+
+### WeakMap
+
+如果你想要在 Map 中儲存 DOM 元素或是其他物件，但又不想要造成 memory leak，那麼你可以使用 [WeakMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap)。WeakMap 與 Map 的差別在於，它不會保持對 key 的引用，所以當 key 被 garbage collection 時，WeakMap 也會自動移除這個 key。
+
+```js title="WeakMap 🚀"
+const metadata = new WeakMap();
+// ✅ 不會有 memory leak，當 myTodo 沒有被引用時，它會被自動移除
+metadata.set(myTodo, {
+  focused: true,
+});
+```
+
+<divider />
+
+在講完四個 Object 會遇到的問題以及 Map 的優點之後，我們再來看看如何在 Map 中實現像 Object 複製的功能、如何將 Object 和 Map 互相轉換，以及在什麼情況下應該使用 Object 或 Map。
+
+## Copying
+
+要複製一個 Object 很簡單，可以使用 `Object.assign` 或是展開運算子 `...`。但其實複製一個 Map 也不會多麼困難，你可以直接使用 `new Map` 來複製一個 Map。另外，如果你想要深度複製一個 Map，你可以使用 [structuredClone](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone) 來做到。
+
+<div style={{ columns: "20rem" }}>
+
+```js title="Copy An Object"
+const myObjectCopy = { ...myObject };
+const myObjectCopy = Object.assign({}, myObject);
+```
+
+```js title="Copy A Map"
+const myMapCopy = new Map(myMap);
+const deepCopy = structuredClone(myMap);
+```
+
+</div>
+
+## Conversion
+
+如果你想要將一個 Object 轉換成一個 Map，你可以使用 `Object.entries` 來將 Object 轉換成一個二維陣列，再使用 `new Map` 來將二維陣列轉換成一個 Map。
+
+```js title="Convert Object to Map"
+const myObject = { a: 1, b: 2, c: 3 };
+const myEntries = Object.entries(myObject);
+// myEntries === [["a", 1], ["b", 2], ["c", 3]]
+const myMap = new Map(myEntries);
+// myMap === Map { "a" => 1, "b" => 2, "c" => 3 }
+```
+
+如果你想要將一個 Map 轉換成一個 Object 更容易，因為 Map 本身就是一個 entries 的集合，你可以使用 `Object.fromEntries` 來將 Map 轉換成一個 Object。
+
+```js title="Convert Map to Object"
+const myMap = new Map(Object.entries({ a: 1, b: 2, c: 3 }));
+const myObject = Object.fromEntries(myMap);
+// myObject === { a: 1, b: 2, c: 3 }
+```
+
+:::tip Helper Function
+我們可以將 Object 轉換成 Map 的函式寫成一個 helper function，這樣之後就可以很方便的將 Object 轉換成 Map 了。
+
+```js title="Convert Object to Map Helper Function"
+const makeMap = (obj) => new Map(Object.entries(obj));
+const myMap = makeMap({ a: 1, b: 2, c: 3 });
+```
+
+寫成 TypeScript 的話，可以這樣寫：
+
+```ts title="Convert Object to Map Helper Function in TypeScript"
+const makeMap = <V = unknown>(obj: Record<string, V>) =>
+  new Map<string, V>(Object.entries(obj));
+const myMap = makeMap({ a: 1, b: 2, c: 3 });
+```
+
+:::
+
+## When to Use Object or Map
+
+當你的資料總是有固定的 key 時，你可以使用 Object，因為 Object 在固定的 key 上有較好的讀取效能。
+
+```js title="Object is faster when key is fixed"
+// 當 key 是固定的時候，Object 會比 Map 快
+const event = {
+  title: "Builder.io Conf",
+  date: new Date(),
+};
+```
+
+但是，當你的資料不是固定的 key 時，或是有大量的新增、刪除、修改的操作時，你應該使用 Map，因為 Map 在這種情況下有較好效能。
+
+```js title="Map is faster when key is not fixed"
+// 當 key 不是固定的時候，Map 會比 Object 快
+const eventsMap = new Map();
+eventsMap.set(event.id, event);
+eventsMap.delete(event.id);
+```
