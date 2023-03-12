@@ -1,0 +1,166 @@
+---
+id: garbage-collector-experiment
+title: Garbage Collector Experiment
+description: Garbage Collector (GC) 是 JS 中非常重要的概念，但是它的行為並不是很容易讓我們 debug，這篇文章使用了 `FinalizationRegistry` 來觀察 GC 的行為。如果你還不熟悉 GC 的概念，可以先閱讀由 Lin Clark 寫的 [A Crash Course in Memory Management](https://hacks.mozilla.org/2017/06/a-crash-course-in-memory-management/)。
+sidebar_label: Garbage Collector Experiment
+hide_title: true
+hide_table_of_contents: false
+tags: [javascript, garbage-collector, finalization-registry]
+draft: false
+last_updated: 2023-03-05
+---
+
+<profile
+  title="Experiments with the JavaScript Garbage Collector"
+  url="https://dev.to/codux/experiments-with-the-javascript-garbage-collector-2ae3"
+  author="Alexey Lebedev"
+  level="intermediate"
+  category={["js/ts"]}
+/>
+
+Garbage Collector (GC) 是 JS 中非常重要的概念，但是它的行為並不是很容易讓我們 debug，這篇文章使用了 `FinalizationRegistry` 來觀察 GC 的行為。如果你還不熟悉 GC 的概念，可以先閱讀由 Lin Clark 寫的 [A Crash Course in Memory Management](https://hacks.mozilla.org/2017/06/a-crash-course-in-memory-management/)。
+
+## Detecting Object Disposal
+
+`FinalizationRegistry` 是一個支援主流 browser 和 Node.js 的 API，它可以讓我們在物件被回收時執行一些程式碼。它的使用方式如下：在底下的程式碼中，由於 `x` 在 `example()` 執行完後不再被引用，因此它將被回收。當 `x` 被回收時，`FinalizationRegistry` 會執行 `console.log(message)`。
+
+```js live noInline
+const registry = new FinalizationRegistry((message) => console.log(message));
+
+function example() {
+  console.log("example() is running, waiting for GC...");
+
+  const x = {};
+  registry.register(x, "x has been collected");
+}
+
+render(<button onClick={example}>Open console and click me</button>);
+```
+
+```bash title="The output in the console will be:"
+example() is running, waiting for GC...
+x has been collected
+```
+
+通常情況下，`x` 並不會馬上被回收，因為瀏覽器的 engine 可能會有其他更重要的事情需要先完成。但我們可以透過 `DevTools > Memory > collect garbage icon` 來強制觸發 GC。
+
+<fig
+  src="/img/reading/js-ts/2023-03-05-garbage-collector-experiment/devtool_gc.png"
+  caption="DevTools > Memory > collect garbage icon"
+/>
+
+## Example 1: Nested Object
+
+在第一個範例，我們嘗試將 `x` 設為 `z` 的屬性，並且將 `x` 設為 `globalThis.temp` 的值。在 `example()` 執行完一段時間後，`z` 和 `y` 會不再被任何東西引用，因此它們將會被回收。但 `x` 仍然被 `globalThis.temp` 引用，因此它不會被回收。如果我們將 `globalThis.temp` 設為 `undefined`，則 `x` 也將被回收。
+
+```js live noInline
+const registry = new FinalizationRegistry((message) => console.log(message));
+
+function example() {
+  console.log("example() is running, waiting for GC...");
+
+  const x = {};
+  const y = {};
+  const z = { x, y };
+  registry.register(x, "x has been collected");
+  registry.register(y, "y has been collected");
+  registry.register(z, "z has been collected");
+
+  globalThis.temp = x;
+}
+
+render(<button onClick={example}>Open console and click me</button>);
+```
+
+```bash title="The output in the console will be:"
+example() is running, waiting for GC...
+z has been collected
+y has been collected
+```
+
+## Example 2: Closure
+
+在第二個範例，我們將 `z.x` 設為 `globalThis.temp` 的值。於是在 `example()` 執行完後，我們將沒辦法再取得 `z` 和 `y`。
+
+照理來說，`z` 和 `y` 應該會被回收，但實際上並沒有。可能是因為 engine 無法判斷 `z.x` 是否只是一個單純的值 (有可能是 `z` 的一個 `getter function`)，因此 engine 沒有將 `z` 回收，也就導致 `y` 也沒有被回收。
+
+```js live noInline
+const registry = new FinalizationRegistry((message) => console.log(message));
+
+function example() {
+  console.log("example() is running, waiting for GC...");
+
+  const x = {};
+  const y = {};
+  const z = { x, y };
+  registry.register(x, "x has been collected");
+  registry.register(y, "y has been collected");
+  registry.register(z, "z has been collected");
+
+  globalThis.temp = () => z.x;
+}
+
+render(<button onClick={example}>Open console and click me</button>);
+```
+
+```bash title="The output in the console will be:"
+example() is running, waiting for GC...
+```
+
+## Example 3: Eval
+
+在第三個範例，我們將 `eval function` 設為 `globalThis.temp`。由於 `eval` 可以執行任何程式碼，因此 engine 並不知道 `eval` 會執行什麼程式碼，因此它無法判斷同樣位在 `example()` 中的 `x` 是否還會被使用。因此 `x` 不會被回收。
+
+事實上，就算我們將 `globalThis.temp` 設為 `() => eval(1)`，`x` 也不會被回收。因為 engine 可能只要看到 `eval` 就會將所有在 `example()` 中的變數都保留下來。
+
+```js live noInline
+const registry = new FinalizationRegistry((message) => console.log(message));
+
+function example() {
+  console.log("example() is running, waiting for GC...");
+
+  const x = {};
+  registry.register(x, "x has been collected");
+
+  globalThis.temp = (string) => eval(string);
+}
+
+render(<button onClick={example}>Open console and click me</button>);
+```
+
+```bash title="The output in the console will be:"
+example() is running, waiting for GC...
+```
+
+## Example 4: DOM Elements
+
+這個範例和第一個很像，只是改用 DOM element 來代替 plain object。不同於 plain object，DOM element 會有連結到它的 parent 和 sibling。所以我們可以透過 `globalThis.temp.parentElement` 來取得 `z`，透過 `globalThis.temp.nextSibling` 來取得 `y`。因此 `z` 和 `y` 都不會被回收。
+
+如果我們執行 `temp.remove()`，`y` 和 `z` 將會被回收，因為 `x` 已經從它的 parent 中分離。但 `x` 不會被回收，因為它仍然被 `temp` 引用。
+
+```js live noInline
+const registry = new FinalizationRegistry((message) => console.log(message));
+
+function example() {
+  console.log("example() is running, waiting for GC...");
+
+  const x = document.createElement("div");
+  const y = document.createElement("div");
+  const z = document.createElement("div");
+
+  z.append(x);
+  z.append(y);
+
+  registry.register(x, "x has been collected");
+  registry.register(y, "y has been collected");
+  registry.register(z, "z has been collected");
+
+  globalThis.temp = x;
+}
+
+render(<button onClick={example}>Open console and click me</button>);
+```
+
+```bash title="The output in the console will be:"
+example() is running, waiting for GC...
+```
