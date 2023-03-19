@@ -1,0 +1,59 @@
+---
+id: vite-instead-of-cra
+title: Vite instead of CRA
+description: Vite instead of CRA
+sidebar_label: 🟩 Vite instead of CRA
+hide_title: true
+hide_table_of_contents: false
+tags: [tag1, tag2]
+draft: false
+last_updated: 2023-03-19
+---
+
+<profile
+  title="What is Vite and Why Should You Use It Instead of Create React App?"
+  url="https://luketheweb.dev/blog/what-is-vite-and-why-should-you-use-it-instead-of-create-react-app"
+  author="Luke Twomey"
+  level="beginner"
+  category={["other", "react/next"]}
+/>
+
+這篇文章介紹了 Vite，一種 React 專案建立工具，並與 Create React App (CRA) 進行比較。作者提到了 Vite 和 CRA 的差異、Vite 的優缺點，以及如何將 CRA 專案轉換成 Vite。
+
+## What is CRA and Vite?
+
+CRA (Create React App) 和 Vite (發音為 veet，源自法文的 fast) 都是用來建立 React 專案的工具，兩者目的一致，都是為了讓開發者可以省略一些繁瑣的設定，快速建立一個 React 專案。這些繁瑣的設定包含但不限於：
+
+- 開發環境的設定，讓開發者可以在瀏覽器上看到即時的結果
+- Linter 的設定，讓開發者可以在 IDE 或是編譯時看到程式碼或規範的錯誤
+- 編譯器的設定，讓開發者可以使用最新的 JavaScript 語法，但又能相容舊版的瀏覽器
+- 打包工具的設定，讓開發者可以將程式碼打包成一個檔案，部屬到任何地方
+
+## The difference between CRA and Vite
+
+CRA 採用的是 bundle based dev server。當開發者修改任意的程式碼，CRA 都會重新 build 整個專案。當專案越來越大，build 的時間就會越來越長，這樣就會造成開發者的效率降低。
+
+<fig
+  src="/img/reading/other/2023-03-19-vite-instead-of-cra/bundle-based-dev-server.png"
+  caption="Bundle based dev server"
+/>
+
+Vite 採用的則是 native ESM based dev server。當開發者修改任意的程式碼，Vite 只會重新 build 修改過的程式碼，這樣就可以大幅度的提升開發者的效率。
+
+<fig
+  src="/img/reading/other/2023-03-19-vite-instead-of-cra/native-esm-based-dev-server.png"
+  caption="Native ESM based dev server"
+/>
+
+Vite 將程式碼分為兩類：dependencies 和 source code。**Dependencies** 通常不會被修改，因此 Vite 會使用 esbuild 提前打包（esbuild 由 Go 編寫、善用多核心 CPU 的特性，可以以 10-100 倍的速度編譯），並且可以被緩存以節省時間。而 **source code** 則是開發者經常修改的部分，因此 Vite 使用 native ESM 方式載入，跳過打包步驟，只在需要時使用，變得非常快速。
+
+## Migrate from CRA to Vite
+
+如果你想要將一個已經建立好的 CRA 專案轉換成 Vite，除了可以[參考作者的文章](https://luketheweb.dev/blog/what-is-vite-and-why-should-you-use-it-instead-of-create-react-app)之外，也可以參考這篇文章：[Migrating from Create React App (CRA) to Vite - Cathal Mac Donnacha](https://cathalmacdonnacha.com/migrating-from-create-react-app-cra-to-vite)。
+
+## Disadvantages Of Vite
+
+Vite 的優點是速度快，但他還是有一些小缺點的。作者在文章中提到了兩個：
+
+1. 如果你想要將一個已經建立好的 CRA 專案轉換成 Vite，你可能會遇到一些套件不相容的問題。
+2. Vite 在開發時使用 esbuild，而在部屬時使用 Rollup。這兩者的差異可能會造成一些問題。
