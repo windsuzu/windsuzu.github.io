@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebsite=self.webpackChunkwebsite||[]).push([[4811],{3707:e=>{e.exports=JSON.parse('{"label":"tag2","permalink":"/tags/tag-2","allTagsPath":"/tags","count":1,"items":[{"id":"frontend/other/vite-instead-of-cra","title":"Vite instead of CRA","description":"Vite instead of CRA","permalink":"/frontend/other/vite-instead-of-cra"}]}')}}]);
