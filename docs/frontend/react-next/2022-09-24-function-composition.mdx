@@ -95,7 +95,7 @@ const MyPage = ({ user = {}, signIn, features = [], log }) => {
 
 ## Function Composition
 
-作者提議的解決方案是將這些重複的區塊 cross-cutting concerns <highlight>透過 function composition</highlight> 組合成一個又大又可以輕鬆維護的元件，這個元件叫做 <highlight>HOC (Higher-Order Component)</highlight>。 如果任何一個區塊需要透過參數有條件的渲染，那麼就<highlight>使用 currying</highlight> 來處理該區塊。
+作者提議的解決方案是將這些重複的區塊 cross-cutting concerns <highlight>透過 function composition</highlight> 組合成一個又大又可以輕鬆維護的元件，這個元件叫做 <highlight>HOC (Higher-Order Component)</highlight>。如果任何一個區塊需要透過參數有條件的渲染，那麼就<highlight>使用 currying</highlight> 來處理該區塊。
 
 ### HOC
 
@@ -141,7 +141,7 @@ export default withProviders;
 
 ### Currying
 
-每個頁面可能會對 HOC 有不同的需求，所以我們需要一個方法來讓 HOC 有條件的渲染。例如，某一個頁面不想顯示 footer，那麼我們就可以透過 currying 來處理這個問題。 Currying 就是一個函數，它接收一個參數並返回原本的函數。在下面的例子中，我們將 `withLayout` 函數 currying，然後將 `showFooter` 作為參數傳入獲得原本的 `withLayout` 函數。這時候的 `withLayout` 函數就可以根據 `showFooter` 的值來決定是否渲染 footer。
+每個頁面可能會對 HOC 有不同的需求，所以我們需要一個方法來讓 HOC 有條件的渲染。例如，某一個頁面不想顯示 footer，那麼我們就可以透過 currying 來處理這個問題。Currying 就是一個函數，它接收一個參數並返回原本的函數。在下面的例子中，我們將 `withLayout` 函數 currying，然後將 `showFooter` 作為參數傳入獲得原本的 `withLayout` 函數。這時候的 `withLayout` 函數就可以根據 `showFooter` 的值來決定是否渲染 footer。
 
 ```jsx title="MyPage.jsx" {2,16-17}
 const withLayout =

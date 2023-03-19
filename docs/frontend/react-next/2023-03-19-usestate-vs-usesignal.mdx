@@ -1,0 +1,118 @@
+---
+id: usestate-vs-usesignal
+title: useState vs useSignal
+description: useSignal() 是一種類似於 React 中的 useState() 儲存應用程序狀態的方式。不同之處在於，useSignal() 返回一個 getter 和一個 setter，而 React 的 useState() 則返回一個 value 和一個 setter。這讓 Signal 可以透過訂閱者模式來追蹤誰在使用 state，並在 state 更新時通知訂閱者，減少不必要的 re-render。
+sidebar_label: 🟨 useState vs useSignal
+hide_title: true
+hide_table_of_contents: false
+tags: [react, usestate, usesignal, signal, qwik, preact, solid]
+draft: false
+last_updated: 2023-03-19
+---
+
+<profile
+  title="useSignal() is the Future of Web Frameworks"
+  url="https://www.builder.io/blog/usesignal-is-the-future-of-web-frameworks"
+  author="MIŠKO HEVERY"
+  level="intermediate"
+  category={["react/next"]}
+/>
+
+`useSignal()` 常見於 React 以外的框架，例如 Vue、Preact、Solid 和 Qwik。這篇文章以 React 為基礎，比較了 `useState()` 和 `useSignal()` 的差異，並解釋了為什麼 `useSignal()` 是未來的趨勢。
+
+`useSignal()` 是一種類似於 React 中的 useState() 儲存應用程序狀態的方式。不同之處在於，`useSignal()` 返回一個 getter 和一個 setter，而 React 的 `useState()` 則返回一個 value 和一個 setter。這讓 Signal 可以透過訂閱者模式來追蹤誰在使用 state，並在 state 更新時通知訂閱者，減少不必要的 re-render。
+
+## useState() vs useSignal()
+
+兩者最根本的差異是 `useState()` 回傳的第一個值是 value（StateValue），而 `useSignal()` 回傳的第一個值是 getter（StateReference）。回傳 getter 的好處是，它可以在需要時才取得 value，這樣可以減少不必要的計算。這也是為什麼 `useSignal()` 可以在不觸發 re-render 的情況下更新 state 的原因。以下是一個 SolidJS 的例子：
+
+```js title="SolidJS Counter with useSignal()"
+export function Counter() {
+  const [getCount, setCount] = createSignal(0);
+  return <button onClick={() => setCount(getCount() + 1)}>{getCount()}</button>;
+}
+```
+
+在 Signal 系統中，呼叫 getter (`getCount()`) 的人，等於訂閱了該 Signal，而 setter (`setCount()`) 則是通知所有訂閱者更新 state，這代表著 Signal 系統可以知道誰在使用 state，並在 state 更新時通知訂閱者，是一個 reactive 的系統。
+
+在 React 中，`useState()` 回傳的第一個值是 value，這代表著 React 無法知道 state 被使用的情況，因此每次 state 更新時，都會重新 render 整個 component tree，是一個非 reactive 的系統，而且計算量也會比較大。
+
+## useRef()
+
+React 的 `useRef()` 與 `useSignal()` 十分相似，因為 `useRef()` 也是 reference 的概念，只是它缺乏了訂閱追蹤和通知的功能。而在 Signal 系統中，`useSignal()` 也可以作為 `useRef()` 來使用。
+
+## useMemo()
+
+考慮以下 React `useMemo` 的例子：即使我們把 `<Display/>` 包在 `React.memo()`，但是當 state 更新時，`<Counter/>` 和裝著 countA 的 `<Display/>` 都會重新 render。
+
+```jsx title="React useMemo()" live noInline
+const Display = ({ count }) => {
+  console.log(`<Display count={${count}}/>`);
+  return <div>{count}</div>;
+};
+const MemoDisplay = React.memo(Display);
+
+const Counter = () => {
+  console.log(`<Counter />`);
+  const [countA, setCountA] = React.useState(0);
+  const [countB, setCountB] = React.useState(0);
+  return (
+    <div>
+      <button onClick={() => setCountA(countA + 1)}>A</button>
+      <button onClick={() => setCountB(countB + 1)}>B</button>
+      <MemoDisplay count={countA} />
+      <MemoDisplay count={countB} />
+    </div>
+  );
+};
+
+render(<Counter />);
+```
+
+```bash title="Console output"
+# Initial render output
+<Counter />
+<Display count={0}/>
+<Display count={0}/>
+
+# "A" button clicked
+<Counter />
+<Display count={1}/>
+```
+
+但 Signal 系統完全不需要 `useMemo()`，因為它本身就能找到需要 state 的地方，並在 state 更新時通知那些訂閱者，因此不需要額外的 memoization。考慮以下 Qwik 的例子：
+
+```js title="Qwik Counter with useSignal()"
+export function Counter() {
+  console.log(`<Counter />`);
+  const countA = useSignal(0);
+  const countB = useSignal(0);
+  return (
+    <div>
+      <button onClick$={() => countA.value++}>A</button>
+      <button onClick$={() => countB.value++}>B</button>
+      <Display count={countA.value} />
+      <Display count={countA.value} />
+    </div>
+  );
+}
+
+export const Display = component$(({ count }: { count: number }) => {
+  console.log(`<Display count={${count}}/>`);
+  return <div>{count}</div>;
+});
+```
+
+```bash title="Console output"
+# Initial render output
+<Counter />
+<Display count={0}/>
+<Display count={0}/>
+
+# "A" button clicked
+# nothing is re-rendered
+```
+
+可以看到，當 state 更新時，除了不會重新 render `<Counter/>`，也不會重新 render `<Display/>`，因為 Signal 系統已經知道使用 count 的地方只有 `<Display/>` 中的 text node，因此只會更新 text node。
+
+Signal 系統並不是一個新的概念，它在 [knockout.js](https://knockoutjs.com/) 甚至更早的框架前就已經出現過。只是近幾年的 compiler 和 JSX 發展，讓 Signal 系統變得更加簡潔且容易使用。

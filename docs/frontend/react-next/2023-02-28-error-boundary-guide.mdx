@@ -71,7 +71,7 @@ const Component = () => {
 
 ### 2. Catch errors in `children`
 
-將 `children` 整個放在 `try/catch` 中是錯誤的。不管是在 `try/catch` 中定義 `children`，還是直接在 `try/catch` 中返回 `children`，都是錯誤的。 這是因為當程式執行到 `<Child />` 時，它並不是真正的渲染元件，而是創建了一個元件元素。這個元素只是一個包含元件類型和屬性的對象，而且會在 `try/catch` 執行成功後，在 React 中被使用，與 `useEffect` 的情況類似，所以也是無法捕獲錯誤的。
+將 `children` 整個放在 `try/catch` 中是錯誤的。不管是在 `try/catch` 中定義 `children`，還是直接在 `try/catch` 中返回 `children`，都是錯誤的。這是因為當程式執行到 `<Child />` 時，它並不是真正的渲染元件，而是創建了一個元件元素。這個元素只是一個包含元件類型和屬性的對象，而且會在 `try/catch` 執行成功後，在 React 中被使用，與 `useEffect` 的情況類似，所以也是無法捕獲錯誤的。
 
 <div style={{columns:"20rem"}}>
 

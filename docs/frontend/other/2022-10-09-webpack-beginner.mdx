@@ -110,7 +110,7 @@ console.log(obj.name); // utils
 
 ## Webpack
 
-因為模組化的機制在瀏覽器中有很多問題（例如與不同瀏覽器和 npm 的相容性），我們需要一個工具來解決它。而這個工具就是 **Webpack**。 **Webpack** 與 **Browserify** 很相似。它不僅允許我們的瀏覽器 JavaScript 代碼輕鬆地利用 **ES6** 的 `import/export` 語法來使用模組，而且還附帶了許多有用的 `loader` 和 `plugin`。 讓我們可以做到像下面這樣的事情：
+因為模組化的機制在瀏覽器中有很多問題（例如與不同瀏覽器和 npm 的相容性），我們需要一個工具來解決它。而這個工具就是 **Webpack**。 **Webpack** 與 **Browserify** 很相似。它不僅允許我們的瀏覽器 JavaScript 代碼輕鬆地利用 **ES6** 的 `import/export` 語法來使用模組，而且還附帶了許多有用的 `loader` 和 `plugin`。讓我們可以做到像下面這樣的事情：
 
 ```js
 // main.js
@@ -122,7 +122,7 @@ console.log(pad("4", 4, 0));
 
 ### How to bundle with Webpack
 
-在使用 Webpack 時，我們首先需要建立一個設定檔（`webpack.config.js`）。在設定檔中，我們需要定義一些基本的參數，例如應用程式的進入點（`./main.js`），以及產生的打包檔案的檔名和位置。 Webpack 也有一個 `mode` 參數，可以在 **development** 和 **production** 之間切換。我們可以使用 **development mode** 讓打包的速度在 development 時變快。
+在使用 Webpack 時，我們首先需要建立一個設定檔（`webpack.config.js`）。在設定檔中，我們需要定義一些基本的參數，例如應用程式的進入點（`./main.js`），以及產生的打包檔案的檔名和位置。Webpack 也有一個 `mode` 參數，可以在 **development** 和 **production** 之間切換。我們可以使用 **development mode** 讓打包的速度在 development 時變快。
 
 ```js
 // webpack.config.js
@@ -137,7 +137,7 @@ module.exports = {
 };
 ```
 
-接著，我們可以使用 `npx webpack` 來執行 Webpack。 Webpack 會自動讀取 `webpack.config.js` 並執行打包。 我們也可以使用 `npx webpack --config webpack.config.js` 來執行 Webpack。
+接著，我們可以使用 `npx webpack` 來執行 Webpack。Webpack 會自動讀取 `webpack.config.js` 並執行打包。我們也可以使用 `npx webpack --config webpack.config.js` 來執行 Webpack。
 
 ```shell
 npm init -y
