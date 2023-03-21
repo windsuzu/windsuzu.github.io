@@ -1,0 +1,155 @@
+---
+id: setcount-three-times
+title: setCount Three Times
+description: 當你在同一個函式中呼叫 setCount 三次時，你覺得 count 會變成多少呢？這會根據你使用 setCount 的方式而有所不同！這篇文章會解釋 React 是如何處理 states 的更新、渲染的順序，最後了解這個問題的答案。
+sidebar_label: 🟩 setCount Three Times
+hide_title: true
+hide_table_of_contents: false
+tags: [react, use-state, render, batch-update]
+draft: true
+last_updated: 2023-03-20
+---
+
+<profile
+  title="Elegantly managing state and renders in React"
+  url="https://remotion.com/blog/untangling-state-in-react"
+  author="CHANTELLE CHAN, ANGELA WANG"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+當你在同一個函式中呼叫 `setCount` 三次時，你覺得 count 會變成多少呢？這會根據你使用 `setCount` 的方式而有所不同！這篇文章會解釋 React 是如何處理 states 的更新、渲染的順序，最後了解這個問題的答案。
+
+```js
+const [count, setCount] = useState(0);
+
+const handleClick = () => {
+  setCount(count + 1);
+  setCount(count + 1);
+  setCount(count + 1);
+};
+```
+
+## React without `useState`
+
+每個 React 教學都會教你如何使用 `useState`，但卻沒告訴你沒有 `useState` 會發生什麼事。在下面的範例中，`count` 並不會因為我們按下按鈕而更新。原因有兩個：
+
+1. 本地變數 (i.e. `count`) 只會存在於每一個全新的 render 中。也就是說，每次 render 時，`count` 都會被重新初始化為 0。
+2. 更新本地變數 (i.e. `count`) 不會觸發新的 render。
+
+```jsx live noInline
+const Counter = () => {
+  let count = 0;
+
+  const handleClick = () => {
+    count = count + 1;
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+};
+
+render(<Counter />);
+```
+
+## React with `useState`
+
+所以 `useState` 提供了兩個特性，幫助我們解決了上面的問題。
+
+1. 幫我們在每一個 render 之間保留住資料。
+2. 幫我們在資料更新時，告訴 React 觸發新的 render。
+
+也就是說，<highlight>React 中的 `state` 是存在於 function component 之外的。當 React
+呼叫 component 時，React 才會給予 component 和所有的 event handler 一個特定 render
+的 `state` 快照。</highlight>
+
+```jsx live noInline
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+
+    console.log("count", count);
+    setTimeout(() => {
+      console.log("count", count);
+    }, 1000);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+};
+
+render(<Counter />);
+```
+
+在上面範例的 `handleClick`，儘管我們在 `setCount` 之後印出 `count`，但 `count` 仍然是 0，甚至使用 `setTimeout` 等待一秒後也是 0。這是因為在初始 render `<Counter>` 時，React 就將 `count` 為 0 的 `state` 賦予給 `<Counter>` 以及 `handleClick` (event handler)。
+
+總而言之，一個 `state` 的快照不會在同一個 `render` 中被更新，更新過的 `state` 快照會在下一個 `render` 中被使用，而 `setCount` 除了更新 `state` 之外，也會觸發新的 `render`。
+
+:::tip React Official Docs
+A state variable’s value never changes within a render, even if its event handler’s code is asynchronous.
+:::
+
+## Batch state change updates
+
+回到這篇文章的開頭，當你在同一個函式中呼叫 `setCount` 三次時，如果這三次呼叫都是使用同一個 `count` 的快照，那麼 `count` 將會是 1！因為 React 會將所有 setter 的更新合併成一個批次，並且在下一個 `render` 中使用更新後的 `state` 快照。所以三個 `setCount` 其實都是 `setCount(0 + 1)`，而等到最後一個 `setCount` 結束後，下一個 `render` 中的 `count` 快照就只會是 1。
+
+```jsx live noInline
+const Counter = () => {
+  console.log("render");
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(count + 1);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+};
+
+render(<Counter />);
+```
+
+為了讓連續三次 `setCount` 的結果變成 3，我們可以為每一個 `setCount` 傳入一個 **updater function**，也就是 `setCount((prevCount) => prevCount + 1)`。React 在進入下一個 `render` 前，會將每一次呼叫 `setCount` 時的最新快照透過參數 (i.e. `prevCount`) 傳入 updater function，並且將 updater function 的回傳值當作新的 `state` 快照。
+
+以下面的範例來說，第一次 `setCount` 的 `prevCount` 是 0，所以 `prevCount + 1` 為 1，第二次 `setCount` 的 `prevCount` 是 1，所以 `prevCount + 1` 為 2，第三次 `setCount` 的 `prevCount` 是 2，所以 `prevCount + 1` 為 3。
+
+```jsx live noInline
+const Counter = () => {
+  console.log("render");
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount((prevCount) => prevCount + 1);
+    setCount((prevCount) => prevCount + 1);
+    setCount((prevCount) => prevCount + 1);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+};
+
+render(<Counter />);
+```
+
+最後，如果我們把第三個 `setCount` 的 updater function 拿掉，改成 `setCount(0)`，那麼下一個 `render` 的 `count` 快照將會是 0。因為 `setCount(0)` 其實等於 `setCount((prevCount) => 0)`，所以 `setCount(0)` 就是不管 `prevCount` 是多少，都將 `count` 設為 0。
+
+```jsx live noInline
+const Counter = () => {
+  console.log("render");
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount((prevCount) => prevCount + 1);
+    setCount((prevCount) => prevCount + 1);
+    setCount(0);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+};
+
+render(<Counter />);
+```
+
+:::tip Try it
+試著從上面的範例中，在 `setCount(0)` 之後，再加上一個 `setCount((prevCount) => prevCount + 1)`，看看 `count` 的值會是多少。
+:::

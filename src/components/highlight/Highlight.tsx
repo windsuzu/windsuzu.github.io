@@ -9,7 +9,8 @@ export const Highlight = ({
     <span
       style={{
         padding: "0 5px",
-        background: "linear-gradient(to bottom, transparent 60%, #fce041 50%)",
+        background:
+          "linear-gradient(to bottom, transparent 60%, #fce0414D 50%)",
         fontWeight: "bold",
       }}
     >
