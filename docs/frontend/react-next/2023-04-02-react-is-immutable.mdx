@@ -1,0 +1,187 @@
+---
+id: react-is-immutable
+title: React is Immutable
+description: 這篇文章介紹了 mutation、immutable 的概念，以及 React 為什麼要用 immutable 的資料結構。簡而言之，React 的 setState 會用 Object.is() (一種類似 === 的**淺層比較**) 來判斷 state 是否有變化，並決定是否要重新渲染。所以，如果只是修改 state 的內容，而沒有改變它的參考位置，React 就不會重新渲染。這意味著，我們不能直接改變 state 來觸發重新渲染，而是要用 setState 給它一個新的值。這就是 React 需要 immutable 的原因，因為我們要用複製和修改的方式來產生一個新的物件或陣列，讓 React 能夠發現 state 的變化。
+sidebar_label: 🟩 React is Immutable
+hide_title: true
+hide_table_of_contents: false
+keywords:
+  - react
+  - immutable
+  - mutation
+  - state
+  - setState
+  - Object.is
+  - shallow compare
+tags: [react, immutable, mutation, state]
+draft: false
+last_updated: 2023-04-02
+---
+
+<profile
+  title="State in React is Immutable"
+  url="https://reacttraining.com/blog/state-in-react-is-immutable"
+  author="Brad Westfall"
+  level="beginner"
+  category={["react/next", "js/ts"]}
+/>
+
+這篇文章介紹了 mutation、immutable 的概念，以及 React 為什麼要用 immutable 的資料結構。簡而言之，React 的 `setState` 會用 `Object.is()` (一種類似 `===` 的**淺層比較**) 來判斷 state 是否有變化，並決定是否要重新渲染。所以，如果只是修改 state 的內容，而沒有改變它的參考位置，React 就不會重新渲染。這意味著，我們不能直接改變 state 來觸發重新渲染，而是要用 `setState` 給它一個新的值。這就是 React 需要 immutable 的原因，因為我們要用複製和修改的方式來產生一個新的物件或陣列，讓 React 能夠發現 state 的變化。
+
+## Mutation in JavaScript
+
+Object 和 Array 是 JavaScript 中最常見可以被「mutate」的資料結構。Mutation 指的是直接改變物件或陣列的內容，而不是修改它的參考位置。例如我可以修改一個物件的屬性，為 `user` 加上一個 `name` 屬性。
+
+```js
+const user = { name: "Brad" };
+user.name = "Jay"; // 修改了 user 這個物件的 name 屬性
+```
+
+我們也可以透過 `push` 或 `splice` 等方法來直接修改陣列的內容。
+
+```js
+const arr = [1, 2, 3];
+arr.push(4); // 加入一個 4，變成 [1, 2, 3, 4]
+arr.splice(1, 1); // 從索引 1 開始，刪除 1 個元素，變成 [1, 3, 4]
+```
+
+:::tip Mutation / const
+Mutation 和 const 關鍵字沒有關係，因為 const 只是防止變數被重新指定，而不是防止變數的內容被改變。所以我們可以修改 const 物件的內容，但不能重新指定它。
+
+```js
+const user = { name: "Brad" };
+// error-start
+user = { name: "Jay" }; // 這樣會報錯，因為 user 不能被重新指定
+user = 0; // 這樣也會報錯，因為 user 不能被重新指定
+// error-end
+
+const arr = [1, 2, 3];
+// error-next-line
+arr = [1, 2, 3, 4]; // 這樣會報錯，因為 arr 不能被重新指定
+```
+
+:::
+
+## Immutability
+
+透過 mutations 直接修改陣列或物件並沒有錯，但是有些人認為使用 mutation 修改資料，長期下來可能會產生一些 bugs，所以他們會選擇使用 **immutable strategy** 來處理資料。Immutable strategy 指的是，我們不會直接修改物件或陣列，而是複製一份，然後修改複製的資料，最後回傳複製的資料。以下是一個 mutable 和 immutable 的範例。
+
+```js
+const user = { id: 1, name: "Brad" };
+
+// mutable
+user.name = "Jay";
+
+// immutable - 這裡我們使用了展開運算子，複製了 user 並加上 name 屬性
+const newUser = { ...user, name: "Jay" };
+
+// immutable - 這裡我們使用了 Object.assign，複製了 user 並加上 name 屬性
+const newUser2 = Object.assign({}, user, { name: "Jay" });
+```
+
+:::tip Primitives are Immutable
+JavaScript 中的 primitive types (例如 number, string, boolean) 都是 immutable 的，所以它們被修改一定都是透過重新指定變數的方式。
+
+```js
+let num = 1;
+num = 2; // 這樣就是重新指定 num，所以 num 會變成 2
+```
+
+:::
+
+## Why is React state immutable?
+
+現在我們知道什麼是 mutable 和 immutable，就可以清楚地解析下面的 React 範例為什麼會有問題。在下面的範例中，雖然對 items 的 push (mutation) 是成功的，但由於 React 用 `Object.is()` 來判斷 state 是否有變化，所以 push 後的 items 對 React 來說是一樣的，因此 React 不會更新 state，也不會重新渲染。
+
+```jsx live noInline
+const ItemList = () => {
+  const [items, setItems] = useState([1, 2, 3]);
+  return (
+    <div>
+      <button
+        onClick={() => {
+          items.push(4);
+          console.log(items); // [1, 2, 3, 4]
+          setItems(items); // not triggering a re-render
+        }}
+      >
+        Add Item (Mutable)
+      </button>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+render(<ItemList />);
+```
+
+如果我們要讓 React 重新渲染，就必須使用 immutable 的方式來更新 state。透過展開運算子，我們可以複製一份 items，然後對複製的 items 添加一個元素 (類似於 `items.push(4)`)，最後再回傳複製的 items。因此，React 會判斷到 state 有變化，所以會重新渲染。
+
+```jsx live noInline
+const ItemList = () => {
+  const [items, setItems] = useState([1, 2, 3]);
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setItems([...items, 4]); // triggering a re-render
+          // setItems(items.concat(4)); also works
+        }}
+      >
+        Add Item (Immutable)
+      </button>
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+render(<ItemList />);
+```
+
+### Primitives in React state
+
+如果我們直接修改 primitive 類別的 state，React 其實會重新渲染！這是因為 `count++` 改變了 count 的參考位置，然後 React 判斷 state 有變化，所以更新了 state 並重新渲染。
+
+但我們不應該使用 `count++`，因為這可能會讓人誤會 mutations 是可以的。我們應該使用 `setCount(count + 1)`，這樣比較清楚地表達我們不會直接修改 state，而是透過傳入新的值來重新渲染。所以我們應該換一個更精確的說法，就是「不要直接修改 state」。
+
+```jsx live noInline
+const Counter = () => {
+  let [count, setCount] = useState(0);
+  return (
+    <div>
+      <button
+        onClick={() => {
+          count++; // IT ACTUALLY WORKS! But don't do this.
+          setCount(count); // triggering a re-render
+        }}
+      >
+        Increment
+      </button>
+      <p>Count: {count}</p>
+    </div>
+  );
+};
+
+render(<Counter />);
+```
+
+:::tip we should not mutate props
+我們更不該直接修改 props，因為 props 是 immutable 的。Props 通常是由父元件傳入，但是直接修改 props 並不會讓 React 重新渲染，可能讓父元件的 state 與子元件的 props 不一致，最終導致預期的結果與實際結果不一致。
+
+```jsx
+const ItemList = ({ items }) => {
+  // error-next-line
+  items.push(4); // this is not allowed
+  return <>{items}</>;
+};
+```
+
+:::
