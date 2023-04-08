@@ -1,0 +1,188 @@
+---
+id: common-beginner-mistakes
+title: Common Beginner Mistakes
+description: 這篇文章列出了 9 項 React 開發者常犯的錯誤，並且提供了解決方法。我從當中擷取了 6 項，其中包括了 (1) 使用 0 作為 JSX 的判斷條件，(2) 直接修改 state，(3) 沒有給 list 的每一個 item 加上 key，(4) 在 setState 後，使用舊的 state 值，(5) 將 input 的 value 初始化為 undefined，(6) 誤將 async promise 當作 useEffect 的 return function。
+sidebar_label: 🟩 Common Beginner Mistakes
+hide_title: true
+hide_table_of_contents: false
+keywords: [react, beginner, mistakes]
+tags: [react]
+draft: false
+last_updated: 2023-04-05
+---
+
+<profile
+  title="Common Beginner Mistakes with React"
+  url="https://www.joshwcomeau.com/react/common-beginner-mistakes"
+  author="Josh W Comeau"
+  level="beginner"
+  category={["react/next"]}
+/>
+
+這篇文章列出了 9 項 React 開發者常犯的錯誤，並且提供了解決方法。我從當中擷取了 6 項，其中包括了 (1) 使用 0 作為 JSX 的判斷條件，(2) 直接修改 state，(3) 沒有給 list 的每一個 item 加上 key，(4) 在 setState 後，使用舊的 state 值，(5) 將 input 的 value 初始化為 undefined，(6) 誤將 async promise 當作 useEffect 的 return function。
+
+## 錯誤一 使用 0 作為渲染 JSX 的判斷條件
+
+因為 0 與其他 falsy 值 (例如 null, undefined, false, NaN, "") 不同，可以在 JSX 中被直接使用。所以如果使用 0 作為渲染元件的判斷條件時，就非常容易發生錯誤。
+
+```jsx title="❌ 使用 0 作為渲染 JSX 的判斷條件"
+<div>{items.length && <ShoppingList items={items} />}</div>
+```
+
+解決方法有兩種：第一種是將渲染條件強制轉為 boolean，第二種是使用三元運算子來渲染元件。
+
+```jsx title="✅ 將判斷條件轉為 boolean"
+<div>{items.length > 0 && <ShoppingList items={items} />}</div>
+```
+
+```jsx title="✅ 改使用三元運算子"
+<div>{items.length ? <ShoppingList items={items} /> : null}</div>
+```
+
+## 錯誤二 直接修改 state
+
+由於直接修改 (mutate) object 或 array 的值，其 reference 並不會改變，所以 React 並不會重新渲染元件。
+
+```jsx title="❌ 直接修改 state"
+const [items, setItems] = useState([]);
+
+function addItem(newItem) {
+  items.push(newItem); // only mutates the state
+  setItems(items); // `items` is still the same reference
+}
+```
+
+解決方法是使用全新的 object 或 array 來更新 state，例如使用展開運算子來複製 object 或 array。
+
+```jsx title="✅ 使用展開運算子來複製 object 或 array"
+const [items, setItems] = useState([]);
+
+function addItem(newItem) {
+  setItems([...items, newItem]);
+}
+```
+
+## 錯誤三 沒有給 list 的每一個 item 加上 key
+
+React 依靠 key prop 來辨識 map 中的每個 item，並且優化渲染的過程。如果沒有提供 key prop 或不是唯一的，React 可能會不必要地銷毀並重新建立元件，這可能會對效能造成負面影響，並且產生錯誤。
+
+```jsx title="❌ 沒有給 list 的每一個 item 加上 key"
+<ul>
+  {items.map((item) => {
+    return <li>{item}</li>;
+  })}
+</ul>
+```
+
+解決方法就是給每個 item 加上唯一的 key prop，我們可以使用 `crypto.randomUUID()` 來產生唯一的 key。但是我們應該在 list 初始化的時候就產生好 key，而不是在 map 的時候。
+
+```jsx title="❌ 在 map 的時候產生 key"
+<ul>
+  {items.map((item) => {
+    return <li key={crypto.randomUUID()}>{item}</li>;
+  })}
+</ul>
+```
+
+```jsx title="✅ 給每個 item 加上唯一的 key prop"
+const [items, setItems] = useState([]);
+
+function addItem(newItem) {
+  setItems([
+    ...items,
+    {
+      id: crypto.randomUUID(),
+      value: newItem,
+    },
+  ]);
+}
+
+<ul>
+  {items.map((item) => {
+    return <li key={item.id}>{item.value}</li>;
+  })}
+</ul>;
+```
+
+:::tip
+另外，React 不建議使用陣列的 index 作為 key prop，因為這可能會導致效能問題和意外的錯誤。到 [React Docs - rendering lists](https://react.dev/learn/rendering-lists#why-does-react-need-keys) 查看更多資訊。
+:::
+
+## 錯誤四 在 setState 後，以為 state 已經更新
+
+因為 state 是每個渲染的快照（snapshot），所以當你在函式中同時使用 setState 與 state 時，你實際上使用的是舊的 state 快照。
+
+```jsx title="❌ 在 setState 後，以為 state 已經更新"
+const [count, setCount] = useState(0);
+
+function handleClick() {
+  setCount((prev) => prev + 1);
+  console.log(count); // count is still 0
+
+  setTimeout(() => {
+    console.log(count); // count is still 0
+  }, 1000);
+}
+```
+
+解決方法是另外定義一個變數來儲存更新後的 state，使用該變數來更新 state 並用於其他的操作。
+
+```jsx title="✅ 另外定義一個變數來儲存更新後的 state"
+const [count, setCount] = useState(0);
+
+function handleClick() {
+  const newCount = count + 1;
+  setCount(newCount);
+  console.log(newCount); // newCount is 1
+}
+```
+
+## 錯誤五 沒有初始化 input 的 value
+
+如果沒有初始化 input 的 value，React 會將其視為 uncontrolled component，並且不會對其進行管理。但是當你在之後將 input 的 value 設定為一個非 undefined 的值時，React 就會將其視為 controlled component。這個時候 React 就會跳出錯誤訊息：`Warning: A component is changing an uncontrolled input to be controlled.`。一個 input 從 uncontrolled 切換到 controlled 或是反過來，都會導致意想不到的行為和錯誤。
+
+```jsx title="❌ 沒有初始化 input 的 value"
+const [value, setValue] = useState();
+
+<input value={value} onChange={(e) => setValue(e.target.value)} />;
+```
+
+解決方法很簡單，只要在 useState 中初始化一個空字串就可以了。
+
+```jsx title="✅ 初始化 input 的 value"
+const [value, setValue] = useState("");
+
+<input value={value} onChange={(e) => setValue(e.target.value)} />;
+```
+
+## 錯誤六 直接將 useEffect 設定為 async
+
+如果直接將 useEffect 設定為 async，return function 就會變成一個 promise，而 React 只期望我們回傳一個清除函式或是 undefined。
+
+```jsx title="❌ 直接將 useEffect 設定為 async"
+useEffect(async () => {
+  const url = `${API}/get-profile?id=${userId}`;
+  const res = await fetch(url);
+  const json = await res.json();
+  setUser(json);
+}, [userId]);
+```
+
+解決方法是在 useEffect 中建立一個 async function，並且直接呼叫它。
+
+```jsx title="✅ 在 useEffect 中建立一個 async function"
+useEffect(() => {
+  async function fetchUser() {
+    const url = `${API}/get-profile?id=${userId}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    setUser(json);
+  }
+
+  fetchUser();
+
+  return () => {
+    // cleanup if needed
+  };
+}, [userId]);
+```
