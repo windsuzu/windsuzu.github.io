@@ -12,7 +12,8 @@ description: This is a description of the page.
 tags: [tag1, tag2]
 keywords: [keyword1, keyword2]
 draft: false
-last_updated: <%= new Date().toISOString().split('T')[0] %>
+last_update:
+  date: <%= new Date().toISOString().split('T')[0] %>
 ---
 
 # <%= title %>

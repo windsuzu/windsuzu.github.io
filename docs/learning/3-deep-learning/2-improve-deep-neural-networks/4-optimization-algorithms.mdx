@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [deep-learning, neural-networks]
 draft: false
-last_updated: 2019-11-01
+last_update:
+  date: 2019-11-01
 ---
 
 本文介紹了有助於進行深度學習最佳化的算法，包括 Mini-Batch Gradient Descent 以及 Exponentially Weighted Averages。因為 Batch Gradient Descent 對整個 training set 進行一次 gradient descent，每個 iteration 時間較長，訓練過程較慢。Mini-Batch 將 Batch 和 Stochastic Gradient Descent 優點合併，但需要找出適合的 batch size。Exponentially Weighted Averages 是一個用於分析移動平均的算法，可以減緩短期波動，反映長期趨勢。

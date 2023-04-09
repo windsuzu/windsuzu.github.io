@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [deep-learning, sequence-models, rnn-models]
 draft: false
-last_updated: 2019-11-22
+last_update:
+  date: 2019-11-22
 ---
 
 本文主要介紹 Gated Recurrent Unit (GRU) 和 Long Short Term Memory (LSTM) 這兩種 Recurrent Neural Network (RNN) 模型的架構及其原理。GRU 將 basic RNN 的結構加上一個 memory cell 來解決 vanishing gradients 的問題，而 LSTM 則是改進 GRU，將 basic RNN 的結構更進一步加上三個 gates 來解決 vanishing gradients 和 long-term dependency 的問題。此外，也介紹了 Bidirectional RNN (BRNN) 和 Deep RNNs (DRNN)，BRNN 能夠雙向處理句子，而 DRNN 則是將 RNN 的 hidden layers 數目增加。

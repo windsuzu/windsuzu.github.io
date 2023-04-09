@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration]
 draft: false
-last_updated: 2020-05-10
+last_update:
+  date: 2020-05-10
 ---
 
 SLAM FrontEnd 主要負責採樣和優化，本文介紹 SLAM FrontEnd 的基本概念，例如辨識影像資料，定義目標函數，以及 ORB SLAM 的結構。ORB SLAM 主要可以分成三大部分，Tracking，Local Mapping 和 Loop Closing。Tracking 負責接收影像資料，並且將影像資料轉換成地圖資料，Local Mapping 負責將地圖資料優化，Loop Closing 負責檢查是否有環路，並且將環路優化。

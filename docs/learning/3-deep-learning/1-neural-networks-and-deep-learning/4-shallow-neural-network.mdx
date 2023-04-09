@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [deep-learning, neural-networks]
 draft: false
-last_updated: 2019-10-28
+last_update:
+  date: 2019-10-28
 ---
 
 Shallow Neural Network 指的是只有幾層 (2 層或以下) 的神經網路 (Neural Network)。它們只有輸入層 (input layer) 和輸出層 (output layer)，通常在中間有一層隱藏層 (hidden layer)。它們常用於一些簡單的機器學習任務，例如垃圾郵件分類，激活函數 (activation function) 通常會用 Sigmoid、Tanh 或 ReLU 來替代線性激活函數。激活函數是一種用於增強神經網路計算能力的函數，為了能夠計算 gradient descent (backpropogation)，需要知道每個 activation function 的導數為何，比如 Sigmoid、Tanh、ReLU 和 Leaky ReLU，其導數可以用微分技巧來計算。此外，為了避免所有 weight 初始化全部為 0 的問題，我們會使用隨機取值來初始化 weights。

@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration]
 draft: false
-last_updated: 2020-05-10
+last_update:
+  date: 2020-05-10
 ---
 
 本文介紹了 SLAM 的後端技術，主要涵蓋 Kalman Filter、Extended Kalman Filter 和 EKF-SLAM，它們都是用來預測未知環境並更新位置的算法。Kalman Filter 是一種基於線性和高斯分布的演算法，而 Extended Kalman Filter 則是在原本的 Kalman filter 上加入線性近似的概念，最後結合 EKF 用於 SLAM 的技術就是 EKF-SLAM，它將 pose 和 landmark 整合起來定義成狀態，並重新定義 prediction 以及 observation model。

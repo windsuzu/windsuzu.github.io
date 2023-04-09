@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [deep-learning, neural-networks]
 draft: false
-last_updated: 2019-10-28
+last_update:
+  date: 2019-10-28
 ---
 
 這篇文章將介紹如何將 Logistic Regression 抽象化為一個 Neural Network 。我們將以一個 Binary Classification 的問題來說明，藉由 Neural Network 來辨別一張 64x64 的圖片是否是貓。我們會定義一個 Loss Function 來作為 training set 的誤差，並且將所有的 training sets 集合形成 Cost Function，再利用 Gradient Descent 來優化參數，以達到最小化 Cost Function。最後我們會介紹如何利用 Computation Graph 來加速參數的更新，以及 Backpropogation 的運算細節。

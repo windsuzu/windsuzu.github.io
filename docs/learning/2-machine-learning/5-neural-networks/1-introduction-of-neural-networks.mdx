@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [machine-learning, neural-networks, introduction]
 draft: false
-last_updated: 2019-10-22
+last_update:
+  date: 2019-10-22
 ---
 
 神經網路是為了模擬人類的大腦運作，大腦可以透過一種 learning algorithm 做到聽、說、讀、寫等活動，而神經網路的最小單位為神經元，它可以由 input wires 接收多個輸入，並將處理過的訊息傳送出去透過 output wires。我們可以再加上 bias unit 作為輸入，而處理這些 input 的為 sigmoid (logistic) activation function。當有多層 layer 時，第一層為 input layer，最後一層為 output layer，而中間所有的層統稱為 hidden layer。我們給予 hidden layer 的 nodes 一個名字：activation units，它是經由 input 和 matrix of weights 作用 output 過來的，hypothesis 就是這些 activation units 經由權重矩陣與輸入矩陣相乘後的結果。

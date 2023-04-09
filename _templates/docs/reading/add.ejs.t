@@ -11,7 +11,8 @@ hide_title: true
 hide_table_of_contents: false
 tags: [tag1, tag2]
 draft: false
-last_updated: <%= new Date().toISOString().split('T')[0] %>
+last_update:
+  date: <%= new Date().toISOString().split('T')[0] %>
 ---
 
 <profile

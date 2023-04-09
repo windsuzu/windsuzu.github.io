@@ -6,7 +6,8 @@ hide_title: false
 hide_table_of_contents: false
 tags: [robotic-navigation-and-exploration, motion-planning]
 draft: false
-last_updated: 2020-05-10
+last_update:
+  date: 2020-05-10
 ---
 
 本文將描述如何使用 State lattice planning 和 Frenet Coordinate 來計算自駕車的軌跡。State lattice planning 透過結合空間和時間，採樣軌跡並計算成本，再檢查軌跡是否可用，並選擇成本最低的軌跡。Frenet Coordinate 將車子位置投影到二維路徑，求取一階、二階微分和最低成本。最後，Trajectory Planning 考慮動態障礙物，計算每個時間點的運動資訊，找出最低成本的軌跡。
