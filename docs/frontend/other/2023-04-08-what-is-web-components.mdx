@@ -1,0 +1,97 @@
+---
+id: what-is-web-components
+title: What is Web Components
+description: 作者想透過這篇文章，介紹 web components 的基本概念、分享他使用 web components 來建立設計系統的經驗和看法，並且解決一些關於 web components 的常見問題和誤解。另外，作者也希望能夠推廣使 web components 成為 web 原生且漸進增強（progressive enhancement）的解決方案。
+sidebar_label: 🟥 What is Web Components
+hide_title: true
+hide_table_of_contents: false
+tags: [web-components]
+keywords:
+  - web components
+  - custom elements
+  - shadow DOM
+  - lit-ssr
+  - webc
+  - enhance
+  - design system
+  - front-of-the-front-end
+  - back-of-the-front-end
+  - js libraries/frameworks
+draft: false
+last_updated:
+  date: 2023-04-08
+---
+
+<profile
+  title="let’s talk about web components"
+  url="https://bradfrost.com/blog/post/lets-talk-about-web-components"
+  author="brad frost"
+  level="advanced"
+  category={["other", "html/css", "js/ts"]}
+/>
+
+作者想透過這篇文章，介紹 web components 的基本概念、分享他使用 web components 來建立設計系統的經驗和看法，並且解決一些關於 web components 的常見問題和誤解。另外，作者也希望能夠推廣使 web components 成為 web 原生且漸進增強（progressive enhancement）的解決方案。
+
+## Web Components
+
+簡單來說，web components 是一套瀏覽器原生的技術，它可以讓我們在 HTML 中定義自己的元素，讓這個元素可以被重複使用。這些 web components 是原生的，也就是說，它們不需要任何的 framework 或是 library，就可以在瀏覽器中運作。所以它們可以被放到任何網站（例如 WordPress, Drupal, Contentful, etc），也可以被放到任何的 web 框架（例如 React, Vue, Angular, Svelte, etc）中。
+
+以下是一個簡單的 web components 的範例。這個 web components 叫做 `ds-badge`，它可以被重複使用。使用他的開發者只需要透過 web components 的 API 傳入 data 就可以在網頁上顯示出來。
+
+```html title="一個叫做 ds-badge 的 web component"
+<ds-badge variant="success" text="99 Luftballons"></ds-badge>
+```
+
+```html title="我們希望 ds-badge 在瀏覽器上顯示出來的東西是："
+<div class="badge badge--success">99 Luftballons</div>
+```
+
+不過，web components 需要 JavaScript 才能運作，如果沒有 JavaScript，web components 就無法顯示出來。第一種解決方案是，我們可以在 web components 的 HTML 中，加入一些預設的內容，這樣就可以在沒有 JavaScript 的狀況下，顯示出一些內容。這樣的做法，就是漸進增強（progressive enhancement）的概念。
+
+```html title="在 web components 的 HTML 中，加入一些預設的內容"
+<ds-badge variant="success" text="99 Luftballons">
+  <div>99 Luftballons</div>
+</ds-badge>
+```
+
+### Declarative Shadow DOM
+
+Web components 還有一種技術叫做 Declarative Shadow DOM，它可以讓我們在 web components 中，定義一個 shadow DOM。這個技術在 web components 中嵌入一個 `<template shadowroot="open">`，讓我們在裡面定義這個 web components 還沒有被 JavaScript 處理之前，要顯示出來的 markup 和 styles。直到 JavaScript 成功載入後，真正的 web components 才會被顯示（hydrated）出來。
+
+```html title="在 web components 的 HTML 中，加入 Shadow DOM"
+<ds-badge variant="success" text="99 Luftballons">
+  <template shadowroot="open">
+    <style>
+      .badge {
+        background-color: green;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+      }
+    </style>
+    <div class="badge">99 Luftballons</div>
+  </template>
+</ds-badge>
+```
+
+### Current Solution
+
+然而，上述的解決方案及 Shadow DOM 看起來不太美觀，而且漸進增強的轉換方式似乎像是黑魔法，這些都會影響開發者的體驗。為了解決這些問題，現在出現了一些解決方案，例如 [lit-ssr](https://lit.dev/docs/ssr/overview/), [WebC](https://github.com/11ty/webc), [Enhance](https://enhance.dev/docs/) 等，讓我們能夠實現以下兩個目標，更好地創建 Web Components：
+
+1. 開發者體驗（Developer Experience）：讓開發者能夠快速地編寫自定義元素（[custom elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements)），例如 `<my-badge variant="success" text="99 Luftballoons">`，而且不需要太多的樣板代碼（boilerplate code）。
+2. 使用者體驗（User Experience）：讓使用者在沒有 JavaScript 的情況下看到預設內容，當 JavaScript 載入完成後再顯示真正的 Web Components，以獲得漸進增強的體驗。
+
+:::tip
+如果你想了解更多關於 web components 的基本概念，可以參考 [Dave’s web
+components course](https://frontendmasters.com/courses/web-components)。
+:::
+
+## The Benefits of Web Components
+
+作者認為，Web Components 的真正優勢在於設計系統元件庫（design system component library）。使用者並不在乎網站採用何種技術，他們只關注能否獲得良好的使用體驗，而要實現這一目標，最重要的是要擁有出色的設計系統元件庫。
+
+為了更好地分類前端，作者將其分為兩個部分：前端的前端（front-of-the-front-end）和前端的後端（back-of-the-front-end）。前者包括 HTML、CSS 和展示性（presentational）的 JavaScript；後者包括不會直接顯示給使用者的程式碼，例如路由、狀態管理和數據提取等。為了創建優秀的「前端的前端」，Web Components 是一個很好的解決方案。Web Components 可以作為傳遞設計系統的載體，讓我們可以在不同的技術中使用相同的設計系統。
+
+## Web Components vs Frameworks
+
+作者認為，Web Components 與 JS libraries/frameworks（例如 React、Angular、Vue 等）不是互斥的技術，而是相輔相成的。它們可以一起使用，創建出良好的 Web 體驗。例如，可以使用 Web Components 來建立設計系統，而使用 JS libraries/frameworks 來處理商業邏輯、狀態管理、快取等工作。透過這種切割方式，可以清楚地分離兩者該關注的地方，實現良好的分工效果。
