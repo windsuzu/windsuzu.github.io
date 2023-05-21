@@ -52,8 +52,6 @@ render(<App />);
 
 ## When to use `useImperativeHandle`
 
-With the help of `useImperativeHandle`, we can intercept the ref pass from the parent and return **a new set of methods** for that ref. In the following example, `btnRef` receives a new set of methods (`changeStyle` and `customFocus`) from `useImperativeHandle` in the `NinjaButton`. This allows us to use the child's (`NinjaButton`) functions from the parent (`App`).
-
 我們可以在自定義元件中使用 `useImperativeHandle` 來攔截父元件傳遞的 `ref`，並回傳一組新的方法給該 `ref`。在下面的範例中，`btnRef` 從 `NinjaButton` 中的 `useImperativeHandle` 中接收到一組新的方法 (`changeStyle`)。這樣一來，我們就可以在父元件 (`App`) 中使用子元件 (`NinjaButton`) 的函式。
 
 ```jsx live noInline

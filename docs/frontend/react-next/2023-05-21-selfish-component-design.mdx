@@ -1,0 +1,179 @@
+---
+id: selfish-component-design
+title: Selfish Component Design
+description: 作者認為當設計元件時，如果過度考慮裡面的內容時，會導致幾個問題。例如太多僵硬的規則，導致無法容納新的設計、或是太過預先定義和結構化以至於無法支援輕微的變化。這些設計通常會導致技術債、更陡的學習曲線、以及維護程式碼的困難。為了避免這種情況，作者建議在元件設計時，應該要有一定程度的自私（selfishness）。元件應該要優先考慮自己的需求和目標，而不是過度考慮其他元件和自己的內容。例如在製作一個 button 時，應該要先考慮 button 的需求（行為、狀態），而不是考慮 button 的內容（樣式、文字、Icon 位置）。這樣的元件才能夠被輕易的重用、維護、擴充。
+sidebar_label: 🟨 Selfish Component Design
+hide_title: true
+hide_table_of_contents: false
+tags: [react, component-design]
+draft: false
+last_update:
+  date: 2023-05-21
+---
+
+<profile
+  title="The Key To Good Component Design Is Selfishness"
+  url="https://www.smashingmagazine.com/2023/01/key-good-component-design-selfishness/"
+  author="Daniel Yuschick"
+  level="intermediate"
+  category={["react/next"]}
+/>
+
+作者認為當設計元件時，如果過度考慮裡面的內容時，會導致幾個問題。例如太多僵硬的規則，導致無法容納新的設計、或是太過預先定義和結構化以至於無法支援輕微的變化。這些設計通常會導致技術債、更陡的學習曲線、以及維護程式碼的困難。
+
+為了避免這種情況，作者建議在元件設計時，應該要有一定程度的自私（selfishness）。元件應該要優先考慮自己的需求和目標，而不是過度考慮其他元件和自己的內容。例如在製作一個 button 時，應該要先考慮 button 的需求（行為、狀態），而不是考慮 button 的內容（樣式、文字、Icon 位置）。這樣的元件才能夠被輕易的重用、維護、擴充。
+
+## 錯誤的元件設計
+
+作者用一系列的例子來說明錯誤的元件設計。例如在製作一個 button 時，過度考慮 button 的內容。首先，我們可能會設計一個 `Button` 元件，並且在裡面加入一個 `text` prop 來決定 button 裡面的文字，以及一個 `theme` prop 來決定 button 的樣式。
+
+```tsx
+<Button
+  onClick={someFunction}
+  text="Add to cart"
+  theme="primary" // or "secondary"
+/>
+```
+
+接著，我們可能會想要在 button 裡面加入一個 icon，於是我們又加入了一個 `icon` prop 來決定 button 裡面的 icon。
+
+```tsx
+<Button theme="primary" onClick={someFunction} text="Add to cart" icon="cart" />
+```
+
+接著，又出現了一個需求，我們希望 icon 可以在文字的左邊或右邊，於是我們把 icon 刪掉，加入了 `iconAtStart` prop、`iconAtEnd` prop 來決定 icon 的位置。
+
+```tsx
+<Button
+  theme="primary"
+  onClick={someFunction}
+  text="Add to cart"
+  iconAtStart="cart"
+  // or iconAtEnd="cart"
+/>
+```
+
+接著，設計和產品討論後，決定要加入擁有不同顏色的 icon，於是我們又加入了 `iconColor` prop 來決定 icon 的顏色。
+
+```tsx
+<Button
+  theme="primary"
+  onClick={someFunction}
+  text="Add to cart"
+  iconAtStart="cart"
+  iconColor="green"
+/>
+```
+
+接著，又出現了一個需求，希望某些 button 是單純只有 icon 的。但是這會造成兩個問題：
+
+1. 我們的 `text` prop 是必填的，我們需要將它改成選填的。
+2. 我們的 `iconAtStart` prop 和 `iconAtEnd` prop 會變得沒有意義，因為不知道是要放在左邊還是右邊。所以我們乾脆再加回 `icon` prop，並且在文件裡面寫明 `icon` 和 `iconAtStart`、`iconAtEnd` 不能同時存在。
+
+```tsx
+<Button theme="primary" onClick={someFunction} icon="cart" iconColor="green" />
+```
+
+隨著設計、產品、使用者的需求無限增加，我們的 button 元件也變得越來越複雜，而且越來越難維護。這是因為我們過度考慮了 button 的內容，而且可能會在接下來發生以下的事件：
+
+1. 把 `text` 移除，改成 `children`，讓使用者可以自由決定 button 裡面的內容。
+2. 把 `Button` 元件拆成 `AddToCartButton` 元件，並且把 `text`、`icon`、`iconColor` 等 props 移除，讓 `AddToCartButton` 只能用在加入購物車的按鈕上。
+3. 把 `Button` 元件改成 `ButtonOld` 元件，並且新增 `ButtonNew` 元件，漸進式重構。
+
+不管是哪個事件發生，都會造成程式碼重複、技術債、以及增加學習曲線。
+
+## 自私的元件設計
+
+一個好的自私元件設計可以遵循以下原則：
+
+1. 它應該要由原生的 HTML 元素驅動，讓原生元素的行為來引導元件的設計。如果原生元素支援 `children`，那麼元件也應該要支援 `children`，這樣可以減少使用者的學習曲線。
+2. 元件應該要讓 `children` 自己決定樣式。這樣可以讓元件更加的彈性，也可以減少元件的複雜度。
+3. 一個自私元件的設計應該要專注在它身上最直接的責任，例如它本身的外觀（例如 `size`, `theme`, `variant`）、它的功能（例如 `onClick`）、以及它的行為（例如 `disabled`, `position`, `hidden`）。
+
+只要遵循這些原則，就可以建立一個簡單、彈性、以及可重複使用的自私元件。
+
+### 將 button 例子修改成自私的 button 元件
+
+一個原生 button 的責任是：
+
+1. 顯示一個按鈕，然後展示任何傳入的 `children`。
+2. 能夠處理任何原生 button 能夠處理的事件、行為，例如 `onClick`、`disabled`、`hidden` 等等。
+
+所以，首先我們可以把 `text` prop 移除，改成 `children`，讓使用者可以自由決定 button 裡面的內容。
+
+```tsx
+<Button onClick={someFunction}>
+  <Icon name="cart" />
+  <span>Add to cart</span>
+</Button>
+```
+
+這個 button 可以有自己的外觀，例如 `size`、`theme`、`variant`。這些 props 並非其他的內容，而是 button 本身所需的外觀，所以我們可以把這些 props 留下來。
+
+```tsx
+<Button size="large" theme="primary" variant="outline" onClick={someFunction}>
+  <Icon name="cart" />
+  <span>Add to cart</span>
+</Button>
+```
+
+如此一來，我們就可以把 `icon`、`iconAtStart`、`iconAtEnd`、`iconColor` 移除，讓使用者自己決定 icon 的位置、顏色、是否要顯示 icon，甚至加入任何其他的內容。
+
+## 組合元件（Composition Component）
+
+一些元件例如 modal 可以被視為由多個元件所組成的元件，且可以有不同的排版。例如，有些 modal 會顯示 header，有些則不會。
+
+在這種情況下，我們可以把 modal 拆成多個元件（而且是自私元件），並且讓使用者自己決定要使用哪些元件。而不是單純的使用一個 modal 元件，然後透過 props (e.g., `hasHeader`, `showFooter`) 來決定要顯示哪些元件。
+
+```tsx
+<Modal>
+  <CloseButton />
+  <Header> ... </Header>
+  <Main> ... </Main>
+</Modal>
+```
+
+### 將 modal 例子修改成組合自私元件
+
+一個 modal 的責任可能包含是否顯示、是否是全螢幕、整個 modal 的 CSS 外觀。
+
+```tsx
+<Modal isShown={showModal} isFullScreen={true} style={...}>
+  ...
+</Modal>
+```
+
+一個 `ClosedButton` 的責任就跟一個正常的 button 一樣，負責顯示按鈕的內容，以及處理按鈕的事件。
+
+```tsx
+<Modal isShown={showModal} isFullScreen={true} style={...}>
+  <CloseButton onClick={closeModal} />
+</Modal>
+```
+
+`Header`, `Main`, `Footer` 則對應到 html 的 `header`, `main`, `footer` 元素，它們的責任只是顯示傳入的 `children`。
+
+```tsx
+<Modal isShown={showModal} isFullScreen={true} style={...}>
+  <CloseButton onClick={closeModal} />
+
+  <Header>
+    <img src="..." alt="..." />
+    <h1>Upload Successful</h1>
+  </Header>
+
+  <Main>
+    <p> ... </p>
+    <div className="..."> ... </div>
+  </Main>
+
+  <Footer>
+    <div className="modal-button-wrapper">
+      <Button onClick={closeModal} theme="tertiary">Skip</Button>
+      <Button onClick={saveProfile} theme="secondary">Save</Button>
+    </div>
+  </Footer>
+</Modal>
+```
+
+如此一來，你就可以自由決定特定的 modal 要顯示哪些元件，而不是透過 props 來決定要顯示哪些元件。
