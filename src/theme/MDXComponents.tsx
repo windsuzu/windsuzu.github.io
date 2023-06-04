@@ -3,6 +3,7 @@ import { CaptionFigure } from "@site/src/components/caption-figure";
 import { ArticleProfile } from "../components/article-profile";
 import { Highlight } from "../components/highlight";
 import { Divider } from "../components/divider";
+import { Takeaway } from "../components/takeaways";
 
 export default {
   ...MDXComponents,
@@ -10,4 +11,5 @@ export default {
   profile: ArticleProfile,
   highlight: Highlight,
   divider: Divider,
+  takeaway: Takeaway,
 };

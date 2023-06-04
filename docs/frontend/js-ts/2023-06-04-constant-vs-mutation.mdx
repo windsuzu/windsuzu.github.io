@@ -1,0 +1,147 @@
+---
+id: constant-vs-mutation
+title: Constant vs Mutation
+description: const 常常會讓 JavaScript 的初學者感到困惑。例如為什麼用 const 初始化的 object 或 array 可以被修改，但是利用 const 初始化的 string 或 number 卻不能被修改呢？這是因為通常我們修改 object 或 array 的動作 (push, splice) 稱為 mutation，並不會修改到物件的記憶體位置，所以與 const 並無關係。而修改 string 或 number 的動作稱為 reassignment，是直接修改物件的記憶體位置，所以就與 const 和 let 有關係了。
+sidebar_label: 🟩 Constant vs Mutation
+hide_title: true
+hide_table_of_contents: false
+tags: [tag1, tag2]
+draft: false
+last_update:
+  date: 2023-06-04
+---
+
+<profile
+  title="The “const” Deception"
+  url="https://www.joshwcomeau.com/javascript/the-const-deception/"
+  author="Josh W Comeau"
+  level="beginner"
+  category={["js/ts"]}
+/>
+
+`const` 常常會讓 JavaScript 的初學者感到困惑。例如為什麼用 `const` 初始化的 `object` 或 `array` 可以被修改，但是利用 `const` 初始化的 `string` 或 `number` 卻不能被修改呢？
+
+這是因為通常我們修改 `object` 或 `array` 的動作 (`push`, `splice`) 稱為 **mutation**，並不會修改到物件的記憶體位置，所以與 `const` 並無關係。而修改 `string` 或 `number` 的動作稱為 **reassignment**，是直接修改物件的記憶體位置，所以就與 `const` 和 `let` 有關係了。
+
+<takeaway
+  points={[
+    <>
+      使用 <code>const</code> 創建的物件可以被修改 (mutate)，但是不能被重新指派
+      (reassign)。
+    </>,
+    <>
+      mutate 指的是修改物件的內容，但是不會改變物件的記憶體位置。例如使用
+      <code>push</code> 修改 <code>array</code> 的內容，或是修改 <code>
+        object
+      </code> 的內容： <code>obj.name = 'John'</code>。
+    </>,
+    <>
+      reassign 指的是修改物件的記憶體位置。例如使用 <code>=</code> 重新指派
+      <code>string</code> 或 <code>number</code> 的值。只有使用 <code>
+        let
+      </code> 宣告的變數才能被重新指派。
+    </>,
+    <>
+      <code>String</code>, <code>Number</code>, <code>Boolean</code>{" "}
+      等都是屬於不可修改 (immutable) 的物件，所以無法被 mutate。我們只能透過
+      reassign 的方式來改變它們的值。例如{" "}
+      <code>let name = 'John'; name = 'Mary';</code> 或是{" "}
+      <code>let age = 20; age += 1;</code>
+    </>,
+  ]}
+/>
+
+## Variable Reassignment
+
+在 JavaScript 有兩種宣告變數 (variable) 的方式：`const` 和 `let`。如果你用 `const` 宣告變數，就代表這個變數的值不能被重新指派 (reassign)。如果你用 `let` 宣告變數，就代表這個變數的值可以被重新指派。這個規則對於 primitive types (`string`, `number`, `boolean`, `null`, `undefined`) 和 object (`object`, `array`) 都是一樣的。
+
+### Primitive Types
+
+```js title="❌ 不行重新指派 const 宣告的變數 (primitive types)"
+const name = "John";
+// error-next-line
+name = "Mary"; // TypeError: Assignment to constant variable.
+```
+
+```js title="✅ 可以重新指派 let 宣告的變數 (primitive types)"
+let name = "John";
+name = "Mary";
+// highlight-next-line
+console.log(name); // Mary
+```
+
+### Object Types
+
+```js title="❌ 不行重新指派 const 宣告的變數 (object types)"
+const person = { name: "John" };
+// error-next-line
+person = { name: "Mary" }; // TypeError: Assignment to constant variable.
+```
+
+```js title="✅ 可以重新指派 let 宣告的變數 (object types)"
+let person = { name: "John" };
+person = { name: "Mary" };
+// highlight-next-line
+console.log(person); // { name: 'Mary' }
+```
+
+## Variable Mutation
+
+Object (`object`, `array`) 在 `const` 的情況下，雖然不能重新指派，但是可以修改 (mutate)。這是因為 `const` 只是保證變數的記憶體位置不會被改變，但是並不保證在同樣的記憶體下，變數的內容不會被改變。
+
+```js title="✅ 可以修改 const 宣告的變數 (object )"
+const person = { name: "John" };
+// highlight-next-line
+person.name = "Mary";
+console.log(person); // { name: 'Mary' }
+```
+
+```js title="✅ 可以修改 const 宣告的變數 (array)"
+const numbers = [1, 2, 3];
+// highlight-next-line
+numbers.push(4);
+console.log(numbers); // [ 1, 2, 3, 4 ]
+```
+
+:::tip
+如果想要避免變數被修改，可以使用 `Object.freeze` 來凍結物件。
+
+```js
+const person = Object.freeze({ name: "John" });
+// highlight-next-line
+person.name = "Mary";
+console.log(person); // { name: 'John' }
+```
+
+但要注意的是，`Object.freeze` 只會凍結第一層的物件，如果物件內還有其他物件，那麼這些物件還是可以被修改。如果要凍結所有的層級，可以使用 [deep-freeze](https://stackoverflow.com/questions/34776846/how-to-freeze-nested-objects-in-javascript) 的方式凍結所有的層級。
+
+```js
+const person = Object.freeze({ name: "John", address: { city: "Taipei" } });
+// highlight-next-line
+person.address.city = "New Taipei";
+console.log(person); // { name: 'John', address: { city: 'New Taipei' } }
+```
+
+另外，我們也可以透過 TypeScript 的 `as const` 在編譯前就確保物件不會被修改。
+
+```ts
+const person = { name: "John" } as const;
+// error-next-line
+person.name = "Mary"; // error: Cannot assign to 'name' because it is a read-only property.
+```
+
+:::
+
+## Primitive Types
+
+Primitives (`string`, `number`, `boolean`, `null`, `undefined`) 指的是不可修改 (immutable) 的物件。這代表我們無法透過 mutate 的方式來改變它們的值，我們只能透過 reassign 的方式重新分配一個記憶體位置來改變它們的值。
+
+```js
+let name = "John";
+name = "Mary";
+console.log(name); // Mary
+
+let age = 20;
+age += 1;
+console.log(age); // 21
+```

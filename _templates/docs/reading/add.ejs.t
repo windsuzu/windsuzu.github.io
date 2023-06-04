@@ -1,5 +1,5 @@
 ---
-to: docs/<%= new Date().toISOString().split('T')[0] %>-<%= h.inflection.dasherize(h.changeCase.lower(title)) %>.mdx
+to: docs/frontend/<%= category.replace("/", "-") %>/<%= new Date().toISOString().split('T')[0] %>-<%= h.inflection.dasherize(h.changeCase.lower(title)) %>.mdx
 ---
 
 ---

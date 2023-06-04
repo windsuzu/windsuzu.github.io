@@ -14,5 +14,6 @@ module.exports = {
   rules: {
     semi: ["error", "always"],
     quotes: ["error", "double"],
+    "@typescript-eslint/explicit-function-return-type": "off",
   },
 };
